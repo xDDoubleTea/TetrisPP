@@ -9,23 +9,22 @@
  * The current target bitmap should have the same height as the animation,
  * and blending should be set to fully copy RGBA.
  */
-void algif_render_frame(ALGIF_ANIMATION *gif, int frame, int xpos, int ypos) {
+void algif_render_frame(ALGIF_ANIMATION* gif, int frame, int xpos, int ypos)
+{
     int x, y, w, h;
-    ALGIF_FRAME *f = &gif->frames[frame];
-    ALGIF_PALETTE *pal;
+    ALGIF_FRAME* f = &gif->frames[frame];
+    ALGIF_PALETTE* pal;
     if (frame == 0) {
         al_draw_filled_rectangle(xpos, ypos, xpos + gif->width,
-              ypos + gif->height, al_map_rgba_f(0, 0, 0, 0));
-    }
-    else {
-        ALGIF_FRAME *p = &gif->frames[frame - 1];
+            ypos + gif->height, al_map_rgba_f(0, 0, 0, 0));
+    } else {
+        ALGIF_FRAME* p = &gif->frames[frame - 1];
         if (p->disposal_method == 2) {
             al_draw_filled_rectangle(xpos + p->xoff, ypos + p->yoff,
                 xpos + p->xoff + p->bitmap_8_bit->w,
                 ypos + p->yoff + p->bitmap_8_bit->h,
                 al_map_rgba_f(0, 0, 0, 0));
-        }
-        else if (p->disposal_method == 3 && gif->store) {
+        } else if (p->disposal_method == 3 && gif->store) {
             al_draw_bitmap_region(gif->store, xpos + p->xoff, ypos + p->yoff,
                 p->bitmap_8_bit->w,
                 p->bitmap_8_bit->h,
@@ -57,8 +56,9 @@ void algif_render_frame(ALGIF_ANIMATION *gif, int frame, int xpos, int ypos) {
     }
 }
 
-ALGIF_ANIMATION *algif_load_animation_f(ALLEGRO_FILE *file) {
-    ALGIF_ANIMATION *gif = algif_load_raw(file);
+ALGIF_ANIMATION* algif_load_animation_f(ALLEGRO_FILE* file)
+{
+    ALGIF_ANIMATION* gif = algif_load_raw(file);
 
     if (!gif)
         return gif;
@@ -72,7 +72,7 @@ ALGIF_ANIMATION *algif_load_animation_f(ALLEGRO_FILE *file) {
     int n = gif->frames_count;
     int i;
     for (i = 0; i < n; i++) {
-        ALGIF_FRAME *f = &gif->frames[i];
+        ALGIF_FRAME* f = &gif->frames[i];
         f->rendered = al_create_bitmap(gif->width, gif->height);
         al_set_target_bitmap(f->rendered);
         algif_render_frame(gif, i, 0, 0);
@@ -83,12 +83,14 @@ ALGIF_ANIMATION *algif_load_animation_f(ALLEGRO_FILE *file) {
     return gif;
 }
 
-ALGIF_ANIMATION *algif_load_animation(char const *filename) {
-    ALLEGRO_FILE *file = al_fopen(filename, "rb");
+ALGIF_ANIMATION* algif_load_animation(char const* filename)
+{
+    ALLEGRO_FILE* file = al_fopen(filename, "rb");
     return algif_load_animation_f(file);
 }
-bool algif_draw_gif(ALGIF_ANIMATION *gif, double x, double y, int flip) {
-    ALLEGRO_BITMAP *frame = algif_get_bitmap(gif, al_get_time());
+bool algif_draw_gif(ALGIF_ANIMATION* gif, double x, double y, int flip)
+{
+    ALLEGRO_BITMAP* frame = algif_get_bitmap(gif, al_get_time());
     if (frame) {
         al_draw_bitmap(frame, x, y, flip);
         return true;
@@ -97,7 +99,8 @@ bool algif_draw_gif(ALGIF_ANIMATION *gif, double x, double y, int flip) {
         return false;
     }
 }
-ALLEGRO_BITMAP *algif_get_bitmap(ALGIF_ANIMATION *gif, double seconds) {
+ALLEGRO_BITMAP* algif_get_bitmap(ALGIF_ANIMATION* gif, double seconds)
+{
     if (gif->start_time == 0) {
         gif->start_time = seconds;
     }
@@ -111,7 +114,7 @@ ALLEGRO_BITMAP *algif_get_bitmap(ALGIF_ANIMATION *gif, double seconds) {
         return gif->frames[0].rendered;
     }
     // loop n times
-    if(gif->loop > 0 && seconds > one_gif_time * gif->loop){
+    if (gif->loop > 0 && seconds > one_gif_time * gif->loop) {
         gif->done = true;
         gif->start_time = 0;
         gif->display_index = 0;
@@ -123,19 +126,20 @@ ALLEGRO_BITMAP *algif_get_bitmap(ALGIF_ANIMATION *gif, double seconds) {
     int i;
     for (i = 0; i < n; i++) {
         progress_gif_time += gif->frames[i].duration / 100.0;
-        if (seconds < progress_gif_time){
+        if (seconds < progress_gif_time) {
             gif->display_index = i;
             return gif->frames[i].rendered;
         }
-
     }
     return gif->frames[0].rendered;
 }
 
-ALLEGRO_BITMAP *algif_get_frame_bitmap(ALGIF_ANIMATION *gif, int i) {
+ALLEGRO_BITMAP* algif_get_frame_bitmap(ALGIF_ANIMATION* gif, int i)
+{
     return gif->frames[i].rendered;
 }
 
-double algif_get_frame_duration(ALGIF_ANIMATION *gif, int i) {
+double algif_get_frame_duration(ALGIF_ANIMATION* gif, int i)
+{
     return gif->frames[i].duration / 100.0;
 }

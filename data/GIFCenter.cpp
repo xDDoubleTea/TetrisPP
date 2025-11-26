@@ -1,11 +1,12 @@
 #include "GIFCenter.h"
-#include <allegro5/bitmap_io.h>
 #include "../Utils.h"
+#include <allegro5/bitmap_io.h>
 
-GIFCenter::~GIFCenter() {
-	for(auto &[path, gif] : gifs) {
-		algif_destroy_animation(gif);
-	}
+GIFCenter::~GIFCenter()
+{
+    for (auto& [path, gif] : gifs) {
+        algif_destroy_animation(gif);
+    }
 }
 
 /**
@@ -15,16 +16,17 @@ GIFCenter::~GIFCenter() {
  * @return The curresponding loaded ALGIF_ANIMATION* instance.
  */
 ALGIF_ANIMATION*
-GIFCenter::get(const std::string &path) {
-	std::map<std::string, ALGIF_ANIMATION*>::iterator it = gifs.find(path);
-	if(it == gifs.end()) {
-		ALGIF_ANIMATION *gif = algif_load_animation(path.c_str());
-		GAME_ASSERT(gif != nullptr, "cannot find GIF: %s.", path.c_str());
-		gifs[path] = gif;
-		return gif;
-	} else {
-		return it->second;
-	}
+GIFCenter::get(const std::string& path)
+{
+    std::map<std::string, ALGIF_ANIMATION*>::iterator it = gifs.find(path);
+    if (it == gifs.end()) {
+        ALGIF_ANIMATION* gif = algif_load_animation(path.c_str());
+        GAME_ASSERT(gif != nullptr, "cannot find GIF: %s.", path.c_str());
+        gifs[path] = gif;
+        return gif;
+    } else {
+        return it->second;
+    }
 }
 
 /**
@@ -32,14 +34,14 @@ GIFCenter::get(const std::string &path) {
  * @param path the GIF path.
  * @return True if the bitmap of the path is removed. False if the bitmap does not exist.
  */
-bool
-GIFCenter::erase(const std::string &path) {
-	std::map<std::string, ALGIF_ANIMATION*>::iterator it = gifs.find(path);
-	if (it == gifs.end()) {
-		return false;
-	}
-	ALGIF_ANIMATION *bitmap = it->second;
-	algif_destroy_animation(bitmap);
-	gifs.erase(it);
-	return true;
+bool GIFCenter::erase(const std::string& path)
+{
+    std::map<std::string, ALGIF_ANIMATION*>::iterator it = gifs.find(path);
+    if (it == gifs.end()) {
+        return false;
+    }
+    ALGIF_ANIMATION* bitmap = it->second;
+    algif_destroy_animation(bitmap);
+    gifs.erase(it);
+    return true;
 }
