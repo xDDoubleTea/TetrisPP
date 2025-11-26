@@ -1,4 +1,4 @@
-#!/usr/bin/zsh
+#!/usr/bin/sh
 set -e
 
 # Remove existing Allegro installation if it exists
@@ -9,7 +9,7 @@ if [ -d "/usr/local/include/allegro5" ] || [ -d "/usr/local/lib/pkgconfig" ] || 
   sudo rm -f /usr/local/lib/pkgconfig/allegro*
 fi
 
-# Install dependencies
+# Assuming yay is installed
 yay -S cmake pkg-config git
 yay -S freetype libpng jpeg freeimage
 yay -S dumb flac libogg libvorbis opusfile theora webp
