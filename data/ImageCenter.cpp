@@ -1,11 +1,12 @@
 #include "ImageCenter.h"
-#include <allegro5/bitmap_io.h>
 #include "../Utils.h"
+#include <allegro5/bitmap_io.h>
 
-ImageCenter::~ImageCenter() {
-	for(auto &[path, bitmap] : bitmaps) {
-		al_destroy_bitmap(bitmap);
-	}
+ImageCenter::~ImageCenter()
+{
+    for (auto& [path, bitmap] : bitmaps) {
+        al_destroy_bitmap(bitmap);
+    }
 }
 
 /**
@@ -15,16 +16,17 @@ ImageCenter::~ImageCenter() {
  * @return The curresponding loaded ALLEGRO_BITMAP* instance.
  */
 ALLEGRO_BITMAP*
-ImageCenter::get(const std::string &path) {
-	std::map<std::string, ALLEGRO_BITMAP*>::iterator it = bitmaps.find(path);
-	if(it == bitmaps.end()) {
-		ALLEGRO_BITMAP *bitmap = al_load_bitmap(path.c_str());
-		GAME_ASSERT(bitmap != nullptr, "cannot find image: %s.", path.c_str());
-		bitmaps[path] = bitmap;
-		return bitmap;
-	} else {
-		return it->second;
-	}
+ImageCenter::get(const std::string& path)
+{
+    std::map<std::string, ALLEGRO_BITMAP*>::iterator it = bitmaps.find(path);
+    if (it == bitmaps.end()) {
+        ALLEGRO_BITMAP* bitmap = al_load_bitmap(path.c_str());
+        GAME_ASSERT(bitmap != nullptr, "cannot find image: %s.", path.c_str());
+        bitmaps[path] = bitmap;
+        return bitmap;
+    } else {
+        return it->second;
+    }
 }
 
 /**
@@ -32,14 +34,14 @@ ImageCenter::get(const std::string &path) {
  * @param path the image path.
  * @return True if the bitmap of the path is removed. False if the bitmap does not exist.
  */
-bool
-ImageCenter::erase(const std::string &path) {
-	std::map<std::string, ALLEGRO_BITMAP*>::iterator it = bitmaps.find(path);
-	if (it == bitmaps.end()) {
-		return false;
-	}
-	ALLEGRO_BITMAP *bitmap = it->second;
-	al_destroy_bitmap(bitmap);
-	bitmaps.erase(it);
-	return true;
+bool ImageCenter::erase(const std::string& path)
+{
+    std::map<std::string, ALLEGRO_BITMAP*>::iterator it = bitmaps.find(path);
+    if (it == bitmaps.end()) {
+        return false;
+    }
+    ALLEGRO_BITMAP* bitmap = it->second;
+    al_destroy_bitmap(bitmap);
+    bitmaps.erase(it);
+    return true;
 }

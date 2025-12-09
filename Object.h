@@ -4,16 +4,17 @@
 #include "shapes/Shape.h"
 #include <memory>
 
-class Object
-{
+class Object {
 public:
-	Object() {}
-	virtual ~Object() {}
+    Object() { }
+    virtual ~Object() { }
+
 public:
-	// pure function for drawing the object
-	virtual void draw() = 0;
+    // pure function for drawing the object
+    virtual void draw() = 0;
+
 public:
-	std::unique_ptr<Shape> shape;
+    std::unique_ptr<Shape> shape;
 };
 
 #endif

@@ -1,20 +1,23 @@
 #include "algif.h"
 
-ALGIF_BITMAP *algif_create_bitmap(int w, int h) {
-    ALGIF_BITMAP *bitmap = (ALGIF_BITMAP*)calloc(1, sizeof *bitmap);
+ALGIF_BITMAP* algif_create_bitmap(int w, int h)
+{
+    ALGIF_BITMAP* bitmap = (ALGIF_BITMAP*)calloc(1, sizeof *bitmap);
     bitmap->w = w;
     bitmap->h = h;
     bitmap->data = (uint8_t*)calloc(1, w * h);
     return bitmap;
 }
 
-void algif_destroy_bitmap(ALGIF_BITMAP *bitmap) {
+void algif_destroy_bitmap(ALGIF_BITMAP* bitmap)
+{
     free(bitmap->data);
     free(bitmap);
 }
 
-void algif_blit(ALGIF_BITMAP *from, ALGIF_BITMAP *to, int xf, int yf, int xt, int yt,
-        int w, int h) {
+void algif_blit(ALGIF_BITMAP* from, ALGIF_BITMAP* to, int xf, int yf, int xt, int yt,
+    int w, int h)
+{
 
     if (w <= 0 || h <= 0)
         return;
@@ -63,8 +66,8 @@ void algif_blit(ALGIF_BITMAP *from, ALGIF_BITMAP *to, int xf, int yf, int xt, in
         return;
 
     /* copy row by row */
-    uint8_t *pf = from->data + yf * from->w;
-    uint8_t *pt = to->data + yt * to->w;
+    uint8_t* pf = from->data + yf * from->w;
+    uint8_t* pt = to->data + yt * to->w;
     int i;
     for (i = 0; i < h; i++) {
         memmove(pt + xt, pf + xf, w);

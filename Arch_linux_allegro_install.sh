@@ -1,0 +1,39 @@
+#!/usr/bin/sh
+set -e
+
+# Remove existing Allegro installation if it exists
+if [ -d "/usr/local/include/allegro5" ] || [ -d "/usr/local/lib/pkgconfig" ] || [ -f "/usr/local/lib/liballegro*" ]; then
+  echo "Removing existing Allegro installation from /usr/local..."
+  sudo rm -rf /usr/local/include/allegro5
+  sudo rm -f /usr/local/lib/liballegro*
+  sudo rm -f /usr/local/lib/pkgconfig/allegro*
+fi
+
+# Assuming yay is installed
+yay -S cmake pkg-config git
+yay -S freetype libpng jpeg freeimage
+yay -S dumb flac libogg libvorbis opusfile theora webp
+yay -S physfs sdl2 gtk+3
+
+# Download minimp3 headers
+wget https://raw.githubusercontent.com/lieff/minimp3/refs/heads/master/minimp3.h
+wget https://raw.githubusercontent.com/lieff/minimp3/refs/heads/master/minimp3_ex.h
+sudo mv minimp3.h /usr/local/include
+sudo mv minimp3_ex.h /usr/local/include
+
+# Download and build Allegro
+wget https://github.com/liballeg/allegro5/releases/download/5.2.7.0/allegro-5.2.7.0.tar.gz
+tar -xzf allegro-5.2.7.0.tar.gz
+cd allegro-5.2.7.0
+mkdir build
+cd build
+cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DWANT_PKG_CONFIG=ON -DWANT_SHARED=ON ..
+make -j8
+sudo make install
+cd ../../
+rm -rf allegro-5.2.7.0
+rm -f allegro-5.2.7.0.tar.gz
+rm -f minimp3.h minimp3_ex.h
+
+echo "Allegro installation complete."
+# Bro is this written by AI????
