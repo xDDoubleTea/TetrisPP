@@ -1,9 +1,6 @@
 #include "DataCenter.h"
 #include "../Level.h"
 #include "../Player.h"
-#include "../monsters/Monster.h"
-#include "../towers/Bullet.h"
-#include "../towers/Tower.h"
 #include <cstring>
 
 // fixed settings
@@ -33,13 +30,4 @@ DataCenter::~DataCenter()
 {
     delete player;
     delete level;
-    for (Monster*& m : monsters) {
-        delete m;
-    }
-    for (Tower*& t : towers) {
-        delete t;
-    }
-    for (Bullet*& b : towerBullets) {
-        delete b;
-    }
 }
