@@ -1,6 +1,4 @@
 #include "Game.h"
-#include "Level.h"
-#include "Player.h"
 #include "Utils.h"
 #include "data/DataCenter.h"
 #include "data/FontCenter.h"
@@ -146,8 +144,6 @@ void Game::game_init()
     ui = new UI();
     ui->init();
 
-    DC->level->init();
-
     // game start
     background = IC->get(background_img_path);
     debug_log("Game state: change to START\n");
@@ -175,7 +171,6 @@ bool Game::game_update()
         static ALLEGRO_SAMPLE_INSTANCE* instance = nullptr;
         if (!is_played) {
             instance = SC->play(game_start_sound_path, ALLEGRO_PLAYMODE_ONCE);
-            DC->level->load_level(1);
             is_played = true;
         }
 
@@ -197,11 +192,7 @@ bool Game::game_update()
             debug_log("<Game> state: change to PAUSE\n");
             state = STATE::PAUSE;
         }
-        if (DC->level->remain_monsters() == 0 && DC->monsters.size() == 0) {
-            debug_log("<Game> state: change to END\n");
-            state = STATE::END;
-        }
-        if (DC->player->HP == 0) {
+        if (true) {
             debug_log("<Game> state: change to END\n");
             state = STATE::END;
         }
@@ -221,11 +212,9 @@ bool Game::game_update()
     }
     // If the game is not paused, we should progress update.
     if (state != STATE::PAUSE) {
-        DC->player->update();
         SC->update();
         ui->update();
         if (state != STATE::START) {
-            DC->level->update();
             OC->update();
         }
     }
@@ -258,7 +247,6 @@ void Game::game_draw()
                 DC->window_height, al_map_rgb(100, 100, 100));
         // user interface
         if (state != STATE::START) {
-            DC->level->draw();
             ui->draw();
             OC->draw();
         }
