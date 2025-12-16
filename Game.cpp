@@ -126,8 +126,8 @@ void Game::game_init()
     ImageCenter* IC = ImageCenter::get_instance();
     FontCenter* FC = FontCenter::get_instance();
     // set window icon
-    game_icon = IC->get(game_icon_img_path);
-    al_set_display_icon(display, game_icon);
+    // game_icon = IC->get(game_icon_img_path);
+    // al_set_display_icon(display, game_icon);
 
     // register events to event_queue
     al_register_event_source(event_queue, al_get_display_event_source(display));
@@ -145,7 +145,7 @@ void Game::game_init()
     ui->init();
 
     // game start
-    background = IC->get(background_img_path);
+    // background = IC->get(background_img_path);
     debug_log("Game state: change to START\n");
     state = STATE::START;
     al_start_timer(timer);
@@ -167,25 +167,25 @@ bool Game::game_update()
 
     switch (state) {
     case STATE::START: {
-        static bool is_played = false;
-        static ALLEGRO_SAMPLE_INSTANCE* instance = nullptr;
-        if (!is_played) {
-            instance = SC->play(game_start_sound_path, ALLEGRO_PLAYMODE_ONCE);
-            is_played = true;
-        }
-
-        if (!SC->is_playing(instance)) {
-            debug_log("<Game> state: change to LEVEL\n");
-            state = STATE::LEVEL;
-        }
+        // static bool is_played = false;
+        // static ALLEGRO_SAMPLE_INSTANCE* instance = nullptr;
+        // if (!is_played) {
+        //     instance = SC->play(game_start_sound_path, ALLEGRO_PLAYMODE_ONCE);
+        //     is_played = true;
+        // }
+        //
+        // if (!SC->is_playing(instance)) {
+        //     debug_log("<Game> state: change to LEVEL\n");
+        //     state = STATE::LEVEL;
+        // }
         break;
     }
     case STATE::LEVEL: {
-        static bool BGM_played = false;
-        if (!BGM_played) {
-            background = SC->play(background_sound_path, ALLEGRO_PLAYMODE_LOOP);
-            BGM_played = true;
-        }
+        // static bool BGM_played = false;
+        // if (!BGM_played) {
+        //     background = SC->play(background_sound_path, ALLEGRO_PLAYMODE_LOOP);
+        //     BGM_played = true;
+        // }
 
         if (DC->key_state[ALLEGRO_KEY_P] && !DC->prev_key_state[ALLEGRO_KEY_P]) {
             SC->toggle_playing(background);
@@ -199,11 +199,11 @@ bool Game::game_update()
         break;
     }
     case STATE::PAUSE: {
-        if (DC->key_state[ALLEGRO_KEY_P] && !DC->prev_key_state[ALLEGRO_KEY_P]) {
-            SC->toggle_playing(background);
-            debug_log("<Game> state: change to LEVEL\n");
-            state = STATE::LEVEL;
-        }
+        // if (DC->key_state[ALLEGRO_KEY_P] && !DC->prev_key_state[ALLEGRO_KEY_P]) {
+        //     SC->toggle_playing(background);
+        //     debug_log("<Game> state: change to LEVEL\n");
+        //     state = STATE::LEVEL;
+        // }
         break;
     }
     case STATE::END: {
@@ -238,7 +238,7 @@ void Game::game_draw()
     al_clear_to_color(al_map_rgb(100, 100, 100));
     if (state != STATE::END) {
         // background
-        al_draw_bitmap(background, 0, 0, 0);
+        // al_draw_bitmap(background, 0, 0, 0);
         if (DC->game_field_length < DC->window_width)
             al_draw_filled_rectangle(DC->game_field_length, 0, DC->window_width,
                 DC->window_height, al_map_rgb(100, 100, 100));

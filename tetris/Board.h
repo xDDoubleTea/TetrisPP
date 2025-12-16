@@ -2,7 +2,7 @@
 #define BOARD_H
 
 #include "TetriminoDefinitions.h"
-#include <vector>
+#include <queue>
 
 class Tetrimino; // Forward declaration
 
@@ -27,7 +27,7 @@ private:
     // Active piece management
     Tetrimino* activePiece;
     Tetrimino* holdPiece;
-    std::vector<Tetrimino*> nextQueue;
+    std::queue<Tetrimino*> nextQueue;
 
     // Gravity
     int gravityTimer;

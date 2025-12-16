@@ -1,4 +1,5 @@
 #include "Board.h"
+#include "../Utils.h"
 #include "../data/DataCenter.h"
 #include "Tetrimino.h"
 #include <algorithm>
@@ -17,6 +18,7 @@ Board::Board()
     : activePiece(nullptr)
     , holdPiece(nullptr)
     , gravitySpeed(60)
+    , gravityTimer(0)
 {
     init();
 }
@@ -35,17 +37,7 @@ void Board::init()
 
 void Board::update()
 {
-    // 1. Gravity Logic
-    if (activePiece) {
-        activePiece->update(*this);
-
-        gravityTimer++;
-        if (gravityTimer >= gravitySpeed) {
-            // Try moving down
-            // If fail, lock piece
-            gravityTimer = 0;
-        }
-    }
+    activePiece->update(*this);
 }
 
 bool Board::checkCollision(TetriminoType type, int rotation, int x, int y)
@@ -108,10 +100,10 @@ void Board::clearLines()
                     grid[ky][kx] = grid[ky - 1][kx];
                 }
             }
-            // Clear top row
+
             for (int kx = 0; kx < GRID_W; kx++)
                 grid[0][kx] = 0;
-            y++; // Check this row index again since it's new data
+            y++;
         }
     }
 }
@@ -119,18 +111,17 @@ void Board::clearLines()
 void Board::spawnPiece()
 {
     // Simple random spawn for now (implement 7-bag later)
-    activePiece = new Tetrimino(TetriminoType::T);
+    activePiece = new Tetrimino(nextQueue.front()->getType());
+    nextQueue.pop();
 }
 
 void Board::draw()
 {
-    // 1. Draw Grid Background
     al_draw_rectangle(BOARD_OFFSET_X, BOARD_OFFSET_Y,
         BOARD_OFFSET_X + GRID_W * BLOCK_SIZE,
         BOARD_OFFSET_Y + GRID_H * BLOCK_SIZE,
         al_map_rgb(255, 255, 255), 2);
 
-    // 2. Draw Locked Blocks
     for (int y = 0; y < GRID_H; y++) {
         for (int x = 0; x < GRID_W; x++) {
             if (grid[y][x] != 0) {
@@ -146,8 +137,23 @@ void Board::draw()
         }
     }
 
-    // 3. Draw Active Piece
     if (activePiece) {
         activePiece->draw(BOARD_OFFSET_X, BOARD_OFFSET_Y, BLOCK_SIZE);
     }
+}
+bool Board::isOccupied(int x, int y) const
+{
+    debug_log("Checking occupancy at (%d, %d)\n", x, y);
+    if (x < 0 || x >= GRID_W || y < 0 || y >= GRID_H)
+        return true;
+    return grid[y][x] != 0;
+}
+
+void Board::generate7Bag()
+{
+    for (int i = 0; i < 7; ++i) {
+        // TODO: Generate random order
+        nextQueue.push(new Tetrimino(static_cast<TetriminoType>(i)));
+    }
+    debug_log("Generated 7-bag of Tetriminos.\n");
 }

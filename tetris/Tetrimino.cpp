@@ -88,6 +88,7 @@ bool Tetrimino::tryMove(Board& board, int dx, int dy)
 
 void Tetrimino::rotate(Board& board, int direction)
 {
+    // TODO: Implement SRS Wall Kicks
     int oldRot = rotation;
     int newRot = (rotation + direction + 4) % 4; // Wrap around 0-3
 

@@ -20,7 +20,6 @@
             exit(1);                                                                \
         }                                                                           \
     }
-
 #ifdef DEBUG
 #define debug_log(...) printf(__VA_ARGS__)
 #else
