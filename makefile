@@ -33,7 +33,7 @@ else # Mac OS / Linux
 	export PKG_CONFIG_PATH := $(ALLEGRO_PKGCONFIG_PATH):$(PKG_CONFIG_PATH)
 
 	ALLEGRO_LIBRARIES := allegro-5 allegro_image-5 allegro_font-5 allegro_ttf-5 allegro_dialog-5 allegro_primitives-5 allegro_audio-5 allegro_acodec-5 allegro_video-5 allegro_main-5
-	ALLEGRO_FLAGS_RELEASE := $(shell PKG_CONFIG_PATH=$(ALLEGRO_PKGCONFIG_PATH) pkg-config --cflags --libs $(ALLEGRO_LIBRARIES))
+	ALLEGRO_FLAGS_RELEASE := $(shell PKG_CONFIG_PATH=$(ALLEGRO_PKGCONFIG_PATH) pkg-config --cflags --libs $(ALLEGRO_LIBRARIES)) -framework Cocoa -framework IOKit -framework CoreVideo -framework OpenGL -framework CoreAudio -framework AudioToolbox
 	ALLEGRO_DLL_PATH_RELEASE := 
 	ALLEGRO_FLAGS_DEBUG := $(ALLEGRO_FLAGS_RELEASE)
 	ALLEGRO_DLL_PATH_DEBUG := 
