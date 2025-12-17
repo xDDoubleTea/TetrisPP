@@ -5,3 +5,5 @@ doxy_file
 *.exe
 *.log
 game
+.cache/clangd/index
+a.out.dSYM/Contents

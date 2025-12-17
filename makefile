@@ -1,5 +1,5 @@
 OUT := game
-CC := g++
+CC := g++ -rpath /usr/local/lib
 
 CXXFLAGS := -Wall -std=c++17 -O2
 SOURCE := $(wildcard *.cpp */*.cpp)
@@ -32,8 +32,8 @@ else # Mac OS / Linux
 	export DYLD_LIBRARY_PATH := $(ALLEGRO_LIB_PATH):$(DYLD_LIBRARY_PATH)
 	export PKG_CONFIG_PATH := $(ALLEGRO_PKGCONFIG_PATH):$(PKG_CONFIG_PATH)
 
-	ALLEGRO_LIBRARIES := allegro-5 allegro_image-5 allegro_font-5 allegro_ttf-5 allegro_dialog-5 allegro_primitives-5 allegro_audio-5 allegro_acodec-5 allegro_video-5 allegro_main-5
-	ALLEGRO_FLAGS_RELEASE := $(shell PKG_CONFIG_PATH=$(ALLEGRO_PKGCONFIG_PATH) pkg-config --cflags --libs $(ALLEGRO_LIBRARIES)) -framework Cocoa -framework IOKit -framework CoreVideo -framework OpenGL -framework CoreAudio -framework AudioToolbox
+	ALLEGRO_LIBRARIES := allegro-5 allegro_image-5 allegro_font-5 allegro_ttf-5 allegro_dialog-5 allegro_primitives-5 allegro_audio-5 allegro_acodec-5 allegro_video-5
+	ALLEGRO_FLAGS_RELEASE := $(shell pkg-config --cflags --libs $(ALLEGRO_LIBRARIES))
 	ALLEGRO_DLL_PATH_RELEASE := 
 	ALLEGRO_FLAGS_DEBUG := $(ALLEGRO_FLAGS_RELEASE)
 	ALLEGRO_DLL_PATH_DEBUG := 
@@ -44,12 +44,12 @@ endif
 
 debug:
 	$(CC) -c -g $(CXXFLAGS) $(SOURCE) $(ALLEGRO_FLAGS_DEBUG) -D DEBUG
-	$(CC) $(CFLAGS) -o $(OUT) $(OBJ) $(ALLEGRO_FLAGS_DEBUG) $(ALLEGRO_DLL_PATH_DEBUG) -Wl,-rpath,$(ALLEGRO_LIB_PATH)
+	$(CC) $(CFLAGS) -o $(OUT) $(OBJ) $(ALLEGRO_FLAGS_DEBUG) $(ALLEGRO_DLL_PATH_DEBUG)
 	$(RM_OBJ)
 
 release:
 	$(CC) -c $(CXXFLAGS) $(SOURCE) $(ALLEGRO_FLAGS_RELEASE)
-	$(CC) $(CFLAGS) -o $(OUT) $(OBJ) $(ALLEGRO_FLAGS_RELEASE) $(ALLEGRO_DLL_PATH_RELEASE) -Wl,-rpath,$(ALLEGRO_LIB_PATH)
+	$(CC) $(CFLAGS) -o $(OUT) $(OBJ) $(ALLEGRO_FLAGS_RELEASE) $(ALLEGRO_DLL_PATH_RELEASE)
 	$(RM_OBJ)
 
 clean:
