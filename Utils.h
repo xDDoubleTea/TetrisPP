@@ -2,7 +2,7 @@
 #define GAME_ASSERT_H_INCLUDED
 
 #include <allegro5/system.h>
-// #include <cstdio>
+#include <cstdio>
 
 /**
  * @brief Assert function for the game.
