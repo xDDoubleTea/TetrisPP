@@ -1,5 +1,5 @@
 OUT := game
-CC := g++ -rpath /usr/local/lib
+CC := g++
 
 CXXFLAGS := -Wall -std=c++17 -O2
 SOURCE := $(wildcard *.cpp */*.cpp)
@@ -24,6 +24,11 @@ ifeq ($(OS), Windows_NT) # Windows OS
 	endif
 else # Mac OS / Linux
 	UNAME_S := $(shell uname -s)
+	ifeq ($(UNAME_S),Darwin)
+		# Mac OS
+		CC := $(CC) -rpath /usr/local/lib
+	endif
+
 	ALLEGRO_LIB_PATH ?= /usr/local/lib
 	ALLEGRO_PKGCONFIG_PATH ?= /usr/local/lib/pkgconfig
 	ALLEGRO_INCLUDE_PATH ?= /usr/local/include
