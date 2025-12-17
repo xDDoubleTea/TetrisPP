@@ -13,12 +13,13 @@ constexpr int GRID_H = 20;
 constexpr int BLOCK_SIZE = 30; // Pixel size
 constexpr int BOARD_OFFSET_X = 200;
 constexpr int BOARD_OFFSET_Y = 50;
+constexpr int GRAVITY_SPEED = 60; // Frames per drop
 
 Board::Board()
     : activePiece(nullptr)
     , holdPiece(nullptr)
-    , gravitySpeed(60)
     , gravityTimer(0)
+    , gravitySpeed(GRAVITY_SPEED)
 {
     init();
 }
@@ -37,7 +38,10 @@ void Board::init()
 
 void Board::update()
 {
-    activePiece->update(*this);
+    if (activePiece)
+        activePiece->update(*this);
+    else
+        debug_log("No active piece to update.\n");
 }
 
 bool Board::checkCollision(TetriminoType type, int rotation, int x, int y)
@@ -111,6 +115,9 @@ void Board::clearLines()
 void Board::spawnPiece()
 {
     // Simple random spawn for now (implement 7-bag later)
+    if (nextQueue.empty()) {
+        generate7Bag();
+    }
     activePiece = new Tetrimino(nextQueue.front()->getType());
     nextQueue.pop();
 }
@@ -134,6 +141,12 @@ void Board::draw()
                     BOARD_OFFSET_Y + (y + 1) * BLOCK_SIZE,
                     al_map_rgb(c.r, c.g, c.b));
             }
+            al_draw_rectangle(
+                BOARD_OFFSET_X + x * BLOCK_SIZE,
+                BOARD_OFFSET_Y + y * BLOCK_SIZE,
+                BOARD_OFFSET_X + (x + 1) * BLOCK_SIZE,
+                BOARD_OFFSET_Y + (y + 1) * BLOCK_SIZE,
+                al_map_rgb(0, 0, 0), 1);
         }
     }
 
@@ -151,9 +164,12 @@ bool Board::isOccupied(int x, int y) const
 
 void Board::generate7Bag()
 {
+    std::vector<int> indices = { 0, 1, 2, 3, 4, 5, 6 };
+    std::shuffle(indices.begin(), indices.end(), std::default_random_engine(std::random_device {}()));
     for (int i = 0; i < 7; ++i) {
         // TODO: Generate random order
-        nextQueue.push(new Tetrimino(static_cast<TetriminoType>(i)));
+
+        nextQueue.push(new Tetrimino(static_cast<TetriminoType>(indices[i])));
     }
     debug_log("Generated 7-bag of Tetriminos.\n");
 }

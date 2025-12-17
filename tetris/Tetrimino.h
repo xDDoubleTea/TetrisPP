@@ -6,6 +6,9 @@
 #include <allegro5/allegro_primitives.h>
 
 // Forward declaration to avoid circular dependency
+namespace Tetris {
+enum class TetriminoType;
+
 class Board;
 
 class Tetrimino {
@@ -41,9 +44,13 @@ private:
     // Helpers
     enum Direction { LEFT = -1,
         RIGHT = 1 };
-    void rotate(Board& board, int direction); // 1 = CW, -1 = CCW
-    bool tryMove(Board& board, int dx, int dy);
-    void hardDrop(Board& board);
+    bool rotate(int direction); // 1 = CW, -1 = CCW
+    void hardDrop();
+
+public:
+    bool tryMove(int dx, int dy);
+    bool collision(int testX, int testY);
 };
 
+}
 #endif

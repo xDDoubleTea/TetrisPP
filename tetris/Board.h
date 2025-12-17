@@ -4,8 +4,8 @@
 #include "TetriminoDefinitions.h"
 #include <queue>
 
+namespace Tetris {
 class Tetrimino; // Forward declaration
-
 class Board {
 public:
     Board();
@@ -37,5 +37,6 @@ private:
     void clearLines();
     void generate7Bag(); // Fills nextQueue
 };
+}
 
 #endif
