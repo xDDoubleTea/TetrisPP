@@ -2,7 +2,7 @@
 #include "Utils.h"
 #include "data/DataCenter.h"
 #include "data/FontCenter.h"
-#include "data/ImageCenter.h"
+// #include "data/ImageCenter.h"
 #include "data/OperationCenter.h"
 #include "data/SoundCenter.h"
 #include <allegro5/allegro_acodec.h>
@@ -12,13 +12,13 @@
 #include <allegro5/allegro_ttf.h>
 #include <cstring>
 #include <iostream>
-#include <vector>
+// #include <vector>
 
 // fixed settings
-constexpr char game_icon_img_path[] = "./assets/image/game_icon.png";
-constexpr char game_start_sound_path[] = "./assets/sound/growl.wav";
-constexpr char background_img_path[] = "./assets/image/StartBackground.jpg";
-constexpr char background_sound_path[] = "./assets/sound/BackgroundMusic.ogg";
+// constexpr char game_icon_img_path[] = "./assets/image/game_icon.png";
+// constexpr char game_start_sound_path[] = "./assets/sound/growl.wav";
+// constexpr char background_img_path[] = "./assets/image/StartBackground.jpg";
+// constexpr char background_sound_path[] = "./assets/sound/BackgroundMusic.ogg";
 
 /**
  * @brief Game entry.
@@ -124,7 +124,7 @@ void Game::game_init()
 {
     DataCenter* DC = DataCenter::get_instance();
     SoundCenter* SC = SoundCenter::get_instance();
-    ImageCenter* IC = ImageCenter::get_instance();
+    // ImageCenter* IC = ImageCenter::get_instance();
     FontCenter* FC = FontCenter::get_instance();
     // set window icon
     // game_icon = IC->get(game_icon_img_path);

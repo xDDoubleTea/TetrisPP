@@ -5,8 +5,6 @@
 #include "../tetris/Board.h"
 #include <allegro5/keycodes.h>
 #include <allegro5/mouse.h>
-#include <map>
-#include <vector>
 
 class Player;
 class Level;
