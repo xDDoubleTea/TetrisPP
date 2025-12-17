@@ -2,6 +2,7 @@
 #define GAME_H_INCLUDED
 
 #include "UI.h"
+#include "tetris/Board.h"
 #include <allegro5/allegro.h>
 
 /**
@@ -36,10 +37,15 @@ private:
     ALLEGRO_BITMAP* background;
 
 private:
+    /**
+     * @brief Allegro objects used in the game.
+     * @see Game::game_init()
+     */
     ALLEGRO_DISPLAY* display;
     ALLEGRO_TIMER* timer;
     ALLEGRO_EVENT_QUEUE* event_queue;
     UI* ui;
+    Tetris::Board* board;
 };
 
 #endif

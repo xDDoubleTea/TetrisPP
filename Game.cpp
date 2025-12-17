@@ -11,6 +11,7 @@
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_ttf.h>
 #include <cstring>
+#include <iostream>
 #include <vector>
 
 // fixed settings
@@ -144,6 +145,16 @@ void Game::game_init()
     ui = new UI();
     ui->init();
 
+    if (board)
+        delete board;
+    debug_log("Initializing Board...\n");
+    board = new Tetris::Board();
+
+    std::cout << "Board address in Game::game_init(): " << board << std::endl;
+    board->init();
+    debug_log("Board initialized.\n");
+    DC->board = board;
+
     // game start
     // background = IC->get(background_img_path);
     debug_log("Game state: change to START\n");
@@ -178,6 +189,10 @@ bool Game::game_update()
         //     debug_log("<Game> state: change to LEVEL\n");
         //     state = STATE::LEVEL;
         // }
+        if (true) {
+            debug_log("<Game> state: change to LEVEL\n");
+            state = STATE::LEVEL;
+        }
         break;
     }
     case STATE::LEVEL: {
@@ -192,10 +207,15 @@ bool Game::game_update()
             debug_log("<Game> state: change to PAUSE\n");
             state = STATE::PAUSE;
         }
-        if (true) {
-            debug_log("<Game> state: change to END\n");
-            state = STATE::END;
-        }
+        if (board)
+            board->update();
+        else
+            GAME_ASSERT(false, "Board is not initialized.");
+
+        // if (true) {
+        //     debug_log("<Game> state: change to END\n");
+        //     state = STATE::END;
+        // }
         break;
     }
     case STATE::PAUSE: {
@@ -249,6 +269,10 @@ void Game::game_draw()
         if (state != STATE::START) {
             ui->draw();
             OC->draw();
+            if (board)
+                board->draw();
+            else
+                GAME_ASSERT(false, "Board is not initialized.");
         }
     }
     switch (state) {
