@@ -15,7 +15,7 @@ public:
     constexpr static int BOARD_OFFSET_X = 200;
     constexpr static int BOARD_OFFSET_Y = 50;
     constexpr static int GRAVITY_SPEED = 60; // Frames per drop
-    constexpr static int HOLD_PIECE_OFFSET_X = BOARD_OFFSET_X - 100;
+    constexpr static int HOLD_PIECE_OFFSET_X = BOARD_OFFSET_X - 50;
     constexpr static int HOLD_PIECE_OFFSET_Y = BOARD_OFFSET_Y;
     constexpr static int NEXT_QUEUE_OFFSET_X = BOARD_OFFSET_X + GRID_W * BLOCK_SIZE + 50;
     constexpr static int NEXT_QUEUE_OFFSET_Y = BOARD_OFFSET_Y;
@@ -25,7 +25,7 @@ public:
 public:
     Board();
     void init();
-    void update(); // Handles gravity for the active piece
+    void update();
     void draw();
 
     // Game Logic

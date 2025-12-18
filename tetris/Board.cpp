@@ -48,12 +48,12 @@ void Board::update()
             holdPiece->setHold(true);
             holdPiece->resetRotation();
             spawnPiece();
-        }else{
+        } else {
 
             holdPiece->setHold(true);
             holdPiece->resetRotation();
             std::swap(holdPiece, activePiece);
-    }
+        }
     }
 }
 
@@ -115,7 +115,17 @@ void Board::lockPiece(const Tetrimino& t)
     size_t linesCleared = clearLines();
     DataCenter* DC = DataCenter::get_instance();
     DC->stat->updatePieceStat(linesCleared, activePiece->TSpin, isPerfectClear(), (linesCleared == 4 || activePiece->AllSpin || activePiece->TSpin), activePiece->AllSpin);
-    debug_log("Damage dealt: %zu\n", t.damageDealt(linesCleared, isPerfectClear(), (linesCleared == 4 || activePiece->AllSpin || activePiece->TSpin), activePiece->TSpin, activePiece->AllSpin));
+    DC->stat->increasePiecesPlaced();
+    size_t damage = t.damageDealt(linesCleared, isPerfectClear(), (linesCleared == 4 || activePiece->AllSpin || activePiece->TSpin), activePiece->TSpin, activePiece->AllSpin);
+    debug_log("Damage dealt: %zu\n", damage);
+    DC->stat->increaseAttacksSent(damage);
+    garbageQueue -= std::min(garbageQueue, damage);
+
+    if (garbageQueue > 0) {
+        addGarbageLines(std::min(garbageQueue, (size_t)8));
+        debug_log("Added garbage lines from queue. Remaining garbage: %zu\n", garbageQueue);
+    }
+
     delete activePiece;
     activePiece = nullptr;
 
@@ -187,7 +197,7 @@ size_t Board::clearLines()
 
 void Board::spawnPiece()
 {
-    if (nextQueue.size() < NEXT_QUEUE_COUNT + 1) {
+    if (nextQueue.size() < 7 + 1) {
         generate7Bag();
     }
     activePiece = new Tetrimino(nextQueue.front()->getType());
@@ -231,6 +241,7 @@ void Board::draw()
     if (!nextQueue.empty()) {
         drawNextQueue(NEXT_QUEUE_COUNT);
     }
+    drawGarbageQueue();
 }
 
 void Board::drawNextQueue(int count)
@@ -257,6 +268,7 @@ void Board::drawNextQueue(int count)
         }
     }
 }
+
 void Board::drawHoldPiece(TetriminoType type)
 {
     if (type == TetriminoType::O && holdPiece == nullptr)
@@ -309,12 +321,12 @@ void Board::generate7Bag()
         debug_log("Queued Tetrimino type: %d\n", indices[i]);
     }
 
-    std::queue<Tetrimino*> tempQueue = nextQueue;
-    while (!tempQueue.empty()) {
-        Tetrimino* t = tempQueue.front();
-        tempQueue.pop();
-        debug_log("Next Queue contains Tetrimino type: %d\n", static_cast<int>(t->getType()));
-    }
+    // std::queue<Tetrimino*> tempQueue = nextQueue;
+    // while (!tempQueue.empty()) {
+    //     Tetrimino* t = tempQueue.front();
+    //     tempQueue.pop();
+    //     debug_log("Next Queue contains Tetrimino type: %d\n", static_cast<int>(t->getType()));
+    // }
 
     debug_log("Generated 7-bag of Tetriminos.\n");
 }
