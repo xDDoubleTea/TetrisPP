@@ -1,6 +1,7 @@
 #ifndef BOARD_H
 #define BOARD_H
 
+#include "../shapes/Shape.h"
 #include "TetriminoDefinitions.h"
 #include <queue>
 
@@ -14,13 +15,17 @@ public:
     constexpr static int BOARD_OFFSET_X = 200;
     constexpr static int BOARD_OFFSET_Y = 50;
     constexpr static int GRAVITY_SPEED = 60; // Frames per drop
-    constexpr static int hold_piece_offset_x = BOARD_OFFSET_X - 100;
-    constexpr static int hold_piece_offset_y = BOARD_OFFSET_Y;
+    constexpr static int HOLD_PIECE_OFFSET_X = BOARD_OFFSET_X - 50;
+    constexpr static int HOLD_PIECE_OFFSET_Y = BOARD_OFFSET_Y;
+    constexpr static int NEXT_QUEUE_OFFSET_X = BOARD_OFFSET_X + GRID_W * BLOCK_SIZE + 50;
+    constexpr static int NEXT_QUEUE_OFFSET_Y = BOARD_OFFSET_Y;
+    constexpr static int NEXT_QUEUE_SPACING = 120;
+    constexpr static int NEXT_QUEUE_COUNT = 5;
 
 public:
     Board();
     void init();
-    void update(); // Handles gravity for the active piece
+    void update();
     void draw();
 
     // Game Logic
@@ -32,7 +37,16 @@ public:
     void drawHoldPiece(TetriminoType type);
 
     // Gravity
-    void updateGravityTimer(bool rotated);
+    void updateGravityTimer(bool rotated, bool moved);
+
+    // Next Queue
+    void drawNextQueue(int count);
+
+    void drawGarbageQueue();
+    // Draw decorations
+    void drawDecorations();
+
+    void addGarbageLines(size_t count);
 
 private:
     // The main grid: 0 = empty, 1-7 = colors/types
@@ -48,8 +62,13 @@ private:
     int gravitySpeed; // Frames per drop (lower is faster)
 
     void spawnPiece();
-    void clearLines();
+    size_t clearLines();
+    bool isPerfectClear();
     void generate7Bag(); // Fills nextQueue
+
+    // Garbage
+    size_t garbageQueue = 0;
+    Shape* hitbox;
 };
 }
 

@@ -145,6 +145,11 @@ void Game::game_init()
     ui = new UI();
     ui->init();
 
+    // if (stat)
+    //     delete stat;
+    stat = new Tetris::Stat();
+    DC->stat = stat;
+
     if (board)
         delete board;
     debug_log("Initializing Board...\n");
@@ -189,10 +194,11 @@ bool Game::game_update()
         //     debug_log("<Game> state: change to LEVEL\n");
         //     state = STATE::LEVEL;
         // }
-        if (true) {
+        if (DC->key_state[ALLEGRO_KEY_ENTER] && !DC->prev_key_state[ALLEGRO_KEY_ENTER]) {
             debug_log("<Game> state: change to LEVEL\n");
             state = STATE::LEVEL;
         }
+
         break;
     }
     case STATE::LEVEL: {
@@ -211,6 +217,10 @@ bool Game::game_update()
             board->update();
         else
             GAME_ASSERT(false, "Board is not initialized.");
+        if (stat)
+            stat->update();
+        else
+            GAME_ASSERT(false, "Stat is not initialized.");
 
         // if (true) {
         //     debug_log("<Game> state: change to END\n");
@@ -255,16 +265,16 @@ void Game::game_draw()
     FontCenter* FC = FontCenter::get_instance();
 
     // Flush the screen first.
-    al_clear_to_color(al_map_rgb(100, 100, 100));
+    al_clear_to_color(al_map_rgb(0, 0, 0));
     if (state != STATE::END) {
         // background
         // al_draw_bitmap(background, 0, 0, 0);
-        if (DC->game_field_length < DC->window_width)
-            al_draw_filled_rectangle(DC->game_field_length, 0, DC->window_width,
-                DC->window_height, al_map_rgb(100, 100, 100));
-        if (DC->game_field_length < DC->window_height)
-            al_draw_filled_rectangle(0, DC->game_field_length, DC->window_width,
-                DC->window_height, al_map_rgb(100, 100, 100));
+        // if (DC->game_field_length < DC->window_width)
+        //     al_draw_filled_rectangle(DC->game_field_length, 0, DC->window_width,
+        //         DC->window_height, al_map_rgb(100, 100, 100));
+        // if (DC->game_field_length < DC->window_height)
+        //     al_draw_filled_rectangle(0, DC->game_field_length, DC->window_width,
+        //         DC->window_height, al_map_rgb(100, 100, 100));
         // user interface
         if (state != STATE::START) {
             ui->draw();
@@ -273,10 +283,16 @@ void Game::game_draw()
                 board->draw();
             else
                 GAME_ASSERT(false, "Board is not initialized.");
+            if (stat) {
+                stat->draw();
+            } else {
+                GAME_ASSERT(false, "Stat is not initialized.");
+            }
         }
     }
     switch (state) {
     case STATE::START: {
+        ui->drawStartScreen();
     }
     case STATE::LEVEL: {
         break;
