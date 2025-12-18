@@ -29,6 +29,8 @@ void Board::init()
     // Initial spawn
     holdPiece = nullptr;
     spawnPiece();
+    // Test Garbage
+    // garbageQueue = 5;
 }
 
 void Board::update()
@@ -130,6 +132,30 @@ bool Board::isPerfectClear()
     }
     return true;
 }
+
+void Board::addGarbageLines(size_t count)
+{
+    // Shift grid up
+    for (int y = 0; y < GRID_H - count; y++) {
+        for (int x = 0; x < GRID_W; x++) {
+            grid[y][x] = grid[y + count][x];
+        }
+    }
+    // Add garbage lines at the bottom
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    int hole = gen() % GRID_W;
+    for (size_t i = 0; i < count; i++) {
+        for (int x = 0; x < GRID_W; x++) {
+            if (x == hole)
+                grid[GRID_H - count + i][x] = 0; // Hole
+            else
+                grid[GRID_H - count + i][x] = 8; // Garbage block (use 8 as garbage ID)
+        }
+    }
+    garbageQueue -= (count > garbageQueue) ? garbageQueue : count;
+}
+
 size_t Board::clearLines()
 {
     // Standard naive line clear implementation
@@ -254,6 +280,17 @@ void Board::drawHoldPiece(TetriminoType type)
             drawX + BLOCK_SIZE, drawY + BLOCK_SIZE,
             al_map_rgb(0, 0, 0), 2);
     }
+}
+
+void Board::drawGarbageQueue()
+{
+    int offsetX = BOARD_OFFSET_X;
+    int offsetY = BOARD_OFFSET_Y + GRID_H * BLOCK_SIZE;
+    ALLEGRO_COLOR color = al_map_rgb(255, 0, 0);
+    for (size_t i = 0; i < garbageQueue; ++i)
+        al_draw_filled_rectangle(
+            offsetX, offsetY - BLOCK_SIZE * i, offsetX - BLOCK_SIZE, offsetY - BLOCK_SIZE * (i + 1),
+            color);
 }
 
 bool Board::isOccupied(int x, int y) const

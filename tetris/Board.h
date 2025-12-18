@@ -1,6 +1,7 @@
 #ifndef BOARD_H
 #define BOARD_H
 
+#include "../shapes/Shape.h"
 #include "TetriminoDefinitions.h"
 #include <queue>
 
@@ -41,8 +42,11 @@ public:
     // Next Queue
     void drawNextQueue(int count);
 
+    void drawGarbageQueue();
     // Draw decorations
     void drawDecorations();
+
+    void addGarbageLines(size_t count);
 
 private:
     // The main grid: 0 = empty, 1-7 = colors/types
@@ -61,6 +65,10 @@ private:
     size_t clearLines();
     bool isPerfectClear();
     void generate7Bag(); // Fills nextQueue
+
+    // Garbage
+    size_t garbageQueue = 0;
+    Shape* hitbox;
 };
 }
 
