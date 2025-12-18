@@ -22,6 +22,8 @@ public:
     void updatePieceStat(size_t lines_cleared, bool is_t_spin, bool is_pc, bool is_b2b, bool is_all_spin);
     size_t getComboCount() const { return combo_count; }
     size_t getBackToBackCount() const { return back_to_back_count; }
+    void increasePiecesPlaced() { pieces_placed++; }
+    void increaseAttacksSent(size_t amount) { attacks_sent += amount; }
 
 private:
     size_t frames_played;
@@ -37,6 +39,7 @@ private:
     size_t back_to_back_count;
     double APM;
     double PPS;
+    double APP;
     size_t combo_count;
 
     // Attack and Damage statistics

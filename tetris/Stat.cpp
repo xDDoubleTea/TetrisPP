@@ -42,8 +42,9 @@ void Stat::update()
 {
     frames_played++;
     time_played_seconds = frames_played / DataCenter::get_instance()->FPS;
-    APM = (pieces_placed / (time_played_seconds / 60.0));
-    PPS = (pieces_placed / static_cast<double>(time_played_seconds));
+    APM = (attacks_sent / static_cast<double>(frames_played)) * DataCenter::get_instance()->FPS * 60.0;
+    PPS = (pieces_placed / static_cast<double>(frames_played)) * DataCenter::get_instance()->FPS;
+    APP = (attacks_sent / static_cast<double>(pieces_placed));
 }
 
 void Stat::updatePieceStat(size_t lines_cleared, bool is_t_spin, bool is_pc, bool is_b2b, bool is_all_spin)
@@ -86,4 +87,12 @@ void Stat::draw()
         Stat::STAT_OFFSET_X, Stat::STAT_OFFSET_Y + 4 * Stat::STAT_SPACING_Y,
         ALLEGRO_ALIGN_CENTER,
         "PPS: %.2f", PPS);
+    al_draw_textf(FC->courier_new[FontSize::MEDIUM], al_map_rgb(STAT_TEXT_COLOR.r, STAT_TEXT_COLOR.g, STAT_TEXT_COLOR.b),
+        Stat::STAT_OFFSET_X, Stat::STAT_OFFSET_Y + 5 * Stat::STAT_SPACING_Y,
+        ALLEGRO_ALIGN_CENTER,
+        "Attacks Sent: %u", static_cast<unsigned>(attacks_sent));
+    al_draw_textf(FC->courier_new[FontSize::MEDIUM], al_map_rgb(STAT_TEXT_COLOR.r, STAT_TEXT_COLOR.g, STAT_TEXT_COLOR.b),
+        Stat::STAT_OFFSET_X, Stat::STAT_OFFSET_Y + 6 * Stat::STAT_SPACING_Y,
+        ALLEGRO_ALIGN_CENTER,
+        "APP: %.2f", APP);
 }
