@@ -183,6 +183,72 @@ bool Tetrimino::collision(int testX, int testY)
     return DC->board->checkCollision(type, rotation, testX, testY);
 }
 
+size_t Tetrimino::damageDealt(size_t linesCleared, bool isPerfectClear, bool isB2B, bool isTSpin, bool isAllSpin) const
+{
+    size_t damage = 0;
+    if (!linesCleared)
+        return 0;
+    if (isPerfectClear) {
+        damage += 10; // Perfect Clear bonus
+    }
+    if (isTSpin) {
+        switch (linesCleared) {
+        case 1:
+            damage += 2;
+            break;
+        case 2:
+            damage += 4;
+            break;
+        case 3:
+            damage += 6;
+            break;
+        default:
+            break;
+        }
+    } else if (isAllSpin) {
+        switch (linesCleared) {
+        case 1:
+            damage += 1;
+            break;
+        case 2:
+            damage += 2;
+            break;
+        case 3:
+            damage += 4;
+            break;
+        default:
+            break;
+        }
+    } else {
+        switch (linesCleared) {
+        case 1:
+            damage += 0;
+            break;
+        case 2:
+            damage += 1;
+            break;
+        case 3:
+            damage += 2;
+            break;
+        case 4:
+            damage += 4;
+            break;
+        default:
+            break;
+        }
+    }
+    DataCenter* DC = DataCenter::get_instance();
+    size_t b2b = DC->stat->getBackToBackCount();
+    if (b2b == 0 || b2b == 1) {
+        // No B2B bonus
+    } else if (b2b > 1 && b2b <= 3) {
+        damage += 1;
+    } else {
+        damage += 2;
+    }
+    return damage;
+}
+
 void Tetrimino::draw(int startX, int startY, int blockSize)
 {
     // 1. Draw Ghost Block
