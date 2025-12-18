@@ -46,11 +46,12 @@ void Board::update()
             holdPiece->setHold(true);
             holdPiece->resetRotation();
             spawnPiece();
-            return;
-        }
-        holdPiece->setHold(true);
-        holdPiece->resetRotation();
-        std::swap(holdPiece, activePiece);
+        }else{
+
+            holdPiece->setHold(true);
+            holdPiece->resetRotation();
+            std::swap(holdPiece, activePiece);
+    }
     }
 }
 
