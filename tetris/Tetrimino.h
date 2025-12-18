@@ -6,6 +6,9 @@
 #include <allegro5/allegro_primitives.h>
 
 // Forward declaration to avoid circular dependency
+namespace Tetris {
+enum class TetriminoType;
+
 class Board;
 
 class Tetrimino {
@@ -27,6 +30,7 @@ private:
     Tetris::TetriminoType type;
     int rotation; // 0, 1, 2, 3
     int gridX, gridY;
+    bool hold;
 
     // Movement Timers (DAS/ARR handling)
     int dasTimer;
@@ -35,15 +39,26 @@ private:
 
     // Movement Settings (Constants)
     static constexpr int DAS_DELAY = 10; // Frames before auto-repeat starts
-    static constexpr int ARR_DELAY = 2; // Frames between auto-repeats
-    static constexpr int LOCK_DELAY = 30; // Frames before locking
+    static constexpr int ARR_DELAY = 1; // Frames between auto-repeats
+    static constexpr int LOCK_DELAY = 60; // Frames before locking
 
     // Helpers
     enum Direction { LEFT = -1,
         RIGHT = 1 };
-    void rotate(Board& board, int direction); // 1 = CW, -1 = CCW
-    bool tryMove(Board& board, int dx, int dy);
-    void hardDrop(Board& board);
+    bool rotate(int direction); // 1 = CW, -1 = CCW
+    void hardDrop();
+
+public:
+    void setHold(bool h)
+    {
+        hold = h;
+        gridX = 4;
+        gridY = 0;
+    }
+    void resetRotation() { rotation = 0; }
+    bool tryMove(int dx, int dy);
+    bool collision(int testX, int testY);
 };
 
+}
 #endif

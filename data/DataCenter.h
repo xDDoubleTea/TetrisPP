@@ -2,10 +2,9 @@
 #define DATACENTER_H_INCLUDED
 
 #include "../shapes/Point.h"
+#include "../tetris/Board.h"
 #include <allegro5/keycodes.h>
 #include <allegro5/mouse.h>
-#include <map>
-#include <vector>
 
 class Player;
 class Level;
@@ -76,6 +75,7 @@ public:
      * @see Level
      */
     Level* level;
+    Tetris::Board* board;
 
 private:
     DataCenter();

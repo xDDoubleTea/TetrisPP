@@ -1,4 +1,5 @@
 #include "Board.h"
+#include "../Utils.h"
 #include "../data/DataCenter.h"
 #include "Tetrimino.h"
 #include <algorithm>
@@ -7,16 +8,12 @@
 using namespace Tetris;
 
 // Constants
-constexpr int GRID_W = 10;
-constexpr int GRID_H = 20;
-constexpr int BLOCK_SIZE = 30; // Pixel size
-constexpr int BOARD_OFFSET_X = 200;
-constexpr int BOARD_OFFSET_Y = 50;
 
 Board::Board()
     : activePiece(nullptr)
     , holdPiece(nullptr)
-    , gravitySpeed(60)
+    , gravityTimer(0)
+    , gravitySpeed(GRAVITY_SPEED)
 {
     init();
 }
@@ -30,24 +27,50 @@ void Board::init()
         }
     }
     // Initial spawn
+    holdPiece = nullptr;
     spawnPiece();
 }
 
 void Board::update()
 {
-    // 1. Gravity Logic
-    if (activePiece) {
+    if (activePiece)
         activePiece->update(*this);
+    else
+        debug_log("No active piece to update.\n");
 
-        gravityTimer++;
-        if (gravityTimer >= gravitySpeed) {
-            // Try moving down
-            // If fail, lock piece
-            gravityTimer = 0;
+    DataCenter* DC = DataCenter::get_instance();
+    if (DC->key_state[ALLEGRO_KEY_C] && !DC->prev_key_state[ALLEGRO_KEY_C]) {
+        // Hold
+        if (!holdPiece) {
+            holdPiece = activePiece;
+            holdPiece->setHold(true);
+            holdPiece->resetRotation();
+            spawnPiece();
+            return;
         }
+        holdPiece->setHold(true);
+        holdPiece->resetRotation();
+        std::swap(holdPiece, activePiece);
     }
 }
 
+void Board::updateGravityTimer(bool rotated)
+{
+    if (rotated) {
+        gravityTimer = 0;
+        return;
+    }
+    gravityTimer++;
+    if (gravityTimer >= gravitySpeed) {
+        gravityTimer = 0;
+        if (activePiece) {
+            if (!activePiece->tryMove(0, 1)) {
+                lockPiece(*activePiece);
+            }
+        }
+    }
+    debug_log("Gravity Timer: %d/%d\n", gravityTimer, gravitySpeed);
+}
 bool Board::checkCollision(TetriminoType type, int rotation, int x, int y)
 {
     int typeIdx = static_cast<int>(type);
@@ -108,10 +131,10 @@ void Board::clearLines()
                     grid[ky][kx] = grid[ky - 1][kx];
                 }
             }
-            // Clear top row
+
             for (int kx = 0; kx < GRID_W; kx++)
                 grid[0][kx] = 0;
-            y++; // Check this row index again since it's new data
+            y++;
         }
     }
 }
@@ -119,18 +142,20 @@ void Board::clearLines()
 void Board::spawnPiece()
 {
     // Simple random spawn for now (implement 7-bag later)
-    activePiece = new Tetrimino(TetriminoType::T);
+    if (nextQueue.size() < 5) {
+        generate7Bag();
+    }
+    activePiece = new Tetrimino(nextQueue.front()->getType());
+    nextQueue.pop();
 }
 
 void Board::draw()
 {
-    // 1. Draw Grid Background
     al_draw_rectangle(BOARD_OFFSET_X, BOARD_OFFSET_Y,
         BOARD_OFFSET_X + GRID_W * BLOCK_SIZE,
         BOARD_OFFSET_Y + GRID_H * BLOCK_SIZE,
         al_map_rgb(255, 255, 255), 2);
 
-    // 2. Draw Locked Blocks
     for (int y = 0; y < GRID_H; y++) {
         for (int x = 0; x < GRID_W; x++) {
             if (grid[y][x] != 0) {
@@ -143,11 +168,65 @@ void Board::draw()
                     BOARD_OFFSET_Y + (y + 1) * BLOCK_SIZE,
                     al_map_rgb(c.r, c.g, c.b));
             }
+            al_draw_rectangle(
+                BOARD_OFFSET_X + x * BLOCK_SIZE,
+                BOARD_OFFSET_Y + y * BLOCK_SIZE,
+                BOARD_OFFSET_X + (x + 1) * BLOCK_SIZE,
+                BOARD_OFFSET_Y + (y + 1) * BLOCK_SIZE,
+                al_map_rgb(0, 0, 0), 1);
         }
     }
 
-    // 3. Draw Active Piece
     if (activePiece) {
         activePiece->draw(BOARD_OFFSET_X, BOARD_OFFSET_Y, BLOCK_SIZE);
     }
+    if (holdPiece) {
+        drawHoldPiece(holdPiece->getType());
+    }
+}
+
+void Board::drawHoldPiece(TetriminoType type)
+{
+    if (type == TetriminoType::O && holdPiece == nullptr)
+        return;
+
+    int typeIdx = static_cast<int>(type);
+    ColorRGB c = tetrimino_colors[typeIdx];
+    ALLEGRO_COLOR color = al_map_rgb(c.r, c.g, c.b);
+
+    int offsetX = BOARD_OFFSET_X - hold_piece_offset_x;
+    int offsetY = BOARD_OFFSET_Y + hold_piece_offset_y;
+
+    for (const auto& block : tetrimino_shapes[typeIdx][0]) {
+        int drawX = offsetX + (block.x + 1) * BLOCK_SIZE; // Centering
+        int drawY = offsetY + (block.y + 1) * BLOCK_SIZE;
+
+        al_draw_filled_rectangle(drawX, drawY,
+            drawX + BLOCK_SIZE, drawY + BLOCK_SIZE,
+            color);
+        al_draw_rectangle(drawX, drawY,
+            drawX + BLOCK_SIZE, drawY + BLOCK_SIZE,
+            al_map_rgb(0, 0, 0), 2);
+    }
+}
+
+bool Board::isOccupied(int x, int y) const
+{
+    debug_log("Checking occupancy at (%d, %d)\n", x, y);
+    if (x < 0 || x >= GRID_W || y < 0 || y >= GRID_H)
+        return true;
+    return grid[y][x] != 0;
+}
+
+void Board::generate7Bag()
+{
+    std::vector<int> indices = { 0, 1, 2, 3, 4, 5, 6 };
+    std::shuffle(indices.begin(), indices.end(), std::default_random_engine(std::random_device {}()));
+    for (int i = 0; i < 7; ++i) {
+        // TODO: Generate random order
+
+        nextQueue.push(new Tetrimino(static_cast<TetriminoType>(indices[i])));
+    }
+
+    debug_log("Generated 7-bag of Tetriminos.\n");
 }
