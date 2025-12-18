@@ -264,16 +264,16 @@ void Game::game_draw()
     FontCenter* FC = FontCenter::get_instance();
 
     // Flush the screen first.
-    al_clear_to_color(al_map_rgb(100, 100, 100));
+    al_clear_to_color(al_map_rgb(0, 0, 0));
     if (state != STATE::END) {
         // background
         // al_draw_bitmap(background, 0, 0, 0);
-        if (DC->game_field_length < DC->window_width)
-            al_draw_filled_rectangle(DC->game_field_length, 0, DC->window_width,
-                DC->window_height, al_map_rgb(100, 100, 100));
-        if (DC->game_field_length < DC->window_height)
-            al_draw_filled_rectangle(0, DC->game_field_length, DC->window_width,
-                DC->window_height, al_map_rgb(100, 100, 100));
+        // if (DC->game_field_length < DC->window_width)
+        //     al_draw_filled_rectangle(DC->game_field_length, 0, DC->window_width,
+        //         DC->window_height, al_map_rgb(100, 100, 100));
+        // if (DC->game_field_length < DC->window_height)
+        //     al_draw_filled_rectangle(0, DC->game_field_length, DC->window_width,
+        //         DC->window_height, al_map_rgb(100, 100, 100));
         // user interface
         if (state != STATE::START) {
             ui->draw();
