@@ -145,6 +145,11 @@ void Game::game_init()
     ui = new UI();
     ui->init();
 
+    // if (stat)
+    //     delete stat;
+    stat = new Tetris::Stat();
+    DC->stat = stat;
+
     if (board)
         delete board;
     debug_log("Initializing Board...\n");
@@ -211,6 +216,10 @@ bool Game::game_update()
             board->update();
         else
             GAME_ASSERT(false, "Board is not initialized.");
+        if (stat)
+            stat->update();
+        else
+            GAME_ASSERT(false, "Stat is not initialized.");
 
         // if (true) {
         //     debug_log("<Game> state: change to END\n");
@@ -273,6 +282,11 @@ void Game::game_draw()
                 board->draw();
             else
                 GAME_ASSERT(false, "Board is not initialized.");
+            if (stat) {
+                stat->draw();
+            } else {
+                GAME_ASSERT(false, "Stat is not initialized.");
+            }
         }
     }
     switch (state) {

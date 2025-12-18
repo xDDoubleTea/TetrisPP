@@ -3,8 +3,8 @@
 
 #include "UI.h"
 #include "tetris/Board.h"
+#include "tetris/Stat.h"
 #include <allegro5/allegro.h>
-
 /**
  * @brief Main class that runs the whole game.
  * @details All game procedures must be processed through this class.
@@ -46,6 +46,7 @@ private:
     ALLEGRO_EVENT_QUEUE* event_queue;
     UI* ui;
     Tetris::Board* board;
+    Tetris::Stat* stat;
 };
 
 #endif

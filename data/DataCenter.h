@@ -3,6 +3,7 @@
 
 #include "../shapes/Point.h"
 #include "../tetris/Board.h"
+#include "../tetris/Stat.h"
 #include <allegro5/keycodes.h>
 #include <allegro5/mouse.h>
 
@@ -76,6 +77,7 @@ public:
      */
     Level* level;
     Tetris::Board* board;
+    Tetris::Stat* stat;
 
 private:
     DataCenter();
