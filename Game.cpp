@@ -291,6 +291,7 @@ void Game::game_draw()
     }
     switch (state) {
     case STATE::START: {
+        ui->drawStartScreen();
     }
     case STATE::LEVEL: {
         break;
