@@ -54,6 +54,9 @@ void Board::update()
             holdPiece->resetRotation();
             std::swap(holdPiece, activePiece);
         }
+        holdPiece->setHold(true);
+        holdPiece->resetRotation();
+        std::swap(holdPiece, activePiece);
     }
 }
 

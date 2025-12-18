@@ -84,6 +84,7 @@ void Tetrimino::update(Board& board)
         TSpin = isTSpin();
         // debug_log("T-Spin: %d, All-Spin: %d\n", TSpin, AllSpin);
     }
+    DC->board->updateGravityTimer(rotated);
 }
 
 bool Tetrimino::tryMove(int dx, int dy)
