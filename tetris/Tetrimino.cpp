@@ -56,16 +56,17 @@ void Tetrimino::update(Board& board)
     }
 
     // --- Rotation ---
+    bool rotated = false;
     if (DC->key_state[ALLEGRO_KEY_UP] && !DC->prev_key_state[ALLEGRO_KEY_UP]) {
-        rotate(1); // Clockwise
+        rotated = rotate(1); // Clockwise
     }
     if (DC->key_state[ALLEGRO_KEY_Z] && !DC->prev_key_state[ALLEGRO_KEY_Z]) {
-        rotate(-1); // Counter-Clockwise
+        rotated = rotate(-1); // Counter-Clockwise
     }
     if (DC->key_state[ALLEGRO_KEY_A] && !DC->prev_key_state[ALLEGRO_KEY_A]) {
-        rotate(2); // 180-degree
+        rotated = rotate(2); // 180-degree
     }
-
+    lockTimer = rotated ? 0 : lockTimer;
     // --- Soft Drop ---
     if (DC->key_state[ALLEGRO_KEY_DOWN]) {
         if (tryMove(0, 1)) {
@@ -77,6 +78,7 @@ void Tetrimino::update(Board& board)
     if (DC->key_state[ALLEGRO_KEY_SPACE] && !DC->prev_key_state[ALLEGRO_KEY_SPACE]) {
         hardDrop();
     }
+    DC->board->updateGravityTimer(rotated);
 }
 
 bool Tetrimino::tryMove(int dx, int dy)
