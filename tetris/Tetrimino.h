@@ -30,6 +30,7 @@ private:
     Tetris::TetriminoType type;
     int rotation; // 0, 1, 2, 3
     int gridX, gridY;
+    bool hold;
 
     // Movement Timers (DAS/ARR handling)
     int dasTimer;
@@ -38,8 +39,8 @@ private:
 
     // Movement Settings (Constants)
     static constexpr int DAS_DELAY = 10; // Frames before auto-repeat starts
-    static constexpr int ARR_DELAY = 2; // Frames between auto-repeats
-    static constexpr int LOCK_DELAY = 30; // Frames before locking
+    static constexpr int ARR_DELAY = 1; // Frames between auto-repeats
+    static constexpr int LOCK_DELAY = 60; // Frames before locking
 
     // Helpers
     enum Direction { LEFT = -1,
@@ -48,6 +49,13 @@ private:
     void hardDrop();
 
 public:
+    void setHold(bool h)
+    {
+        hold = h;
+        gridX = 4;
+        gridY = 0;
+    }
+    void resetRotation() { rotation = 0; }
     bool tryMove(int dx, int dy);
     bool collision(int testX, int testY);
 };
