@@ -113,8 +113,10 @@ void Board::lockPiece(const Tetrimino& t)
     size_t linesCleared = clearLines();
     DataCenter* DC = DataCenter::get_instance();
     DC->stat->updatePieceStat(linesCleared, activePiece->TSpin, isPerfectClear(), (linesCleared == 4 || activePiece->AllSpin || activePiece->TSpin), activePiece->AllSpin);
+    debug_log("Damage dealt: %zu\n", t.damageDealt(linesCleared, isPerfectClear(), (linesCleared == 4 || activePiece->AllSpin || activePiece->TSpin), activePiece->TSpin, activePiece->AllSpin));
     delete activePiece;
     activePiece = nullptr;
+
     spawnPiece();
 }
 
@@ -256,7 +258,6 @@ void Board::drawHoldPiece(TetriminoType type)
 
 bool Board::isOccupied(int x, int y) const
 {
-    debug_log("Checking occupancy at (%d, %d)\n", x, y);
     if (x < 0 || x >= GRID_W || y < 0 || y >= GRID_H)
         return true;
     return grid[y][x] != 0;
@@ -267,9 +268,15 @@ void Board::generate7Bag()
     std::vector<int> indices = { 0, 1, 2, 3, 4, 5, 6 };
     std::shuffle(indices.begin(), indices.end(), std::default_random_engine(std::random_device {}()));
     for (int i = 0; i < 7; ++i) {
-        // TODO: Generate random order
-
         nextQueue.push(new Tetrimino(static_cast<TetriminoType>(indices[i])));
+        debug_log("Queued Tetrimino type: %d\n", indices[i]);
+    }
+
+    std::queue<Tetrimino*> tempQueue = nextQueue;
+    while (!tempQueue.empty()) {
+        Tetrimino* t = tempQueue.front();
+        tempQueue.pop();
+        debug_log("Next Queue contains Tetrimino type: %d\n", static_cast<int>(t->getType()));
     }
 
     debug_log("Generated 7-bag of Tetriminos.\n");

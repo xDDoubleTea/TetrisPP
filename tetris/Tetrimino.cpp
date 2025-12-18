@@ -82,7 +82,7 @@ void Tetrimino::update(Board& board)
     if (rotated) {
         AllSpin = isAllSpin();
         TSpin = isTSpin();
-        debug_log("T-Spin: %d, All-Spin: %d\n", TSpin, AllSpin);
+        // debug_log("T-Spin: %d, All-Spin: %d\n", TSpin, AllSpin);
     }
 }
 
@@ -148,7 +148,7 @@ bool Tetrimino::isTSpin()
             occupied_corners++;
         }
     }
-    debug_log("T-Spin check: %d corners occupied.\n", occupied_corners);
+    // debug_log("T-Spin check: %d corners occupied.\n", occupied_corners);
     return occupied_corners >= 3;
 }
 
@@ -165,7 +165,7 @@ bool Tetrimino::isAllSpin()
         if (!tryDryMove(offset.x, offset.y))
             occupied_corners++;
     }
-    debug_log("All-Spin check: %d corners occupied.\n", occupied_corners);
+    // debug_log("All-Spin check: %d corners occupied.\n", occupied_corners);
     return occupied_corners >= 3;
 }
 
