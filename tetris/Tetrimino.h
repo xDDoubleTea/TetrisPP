@@ -24,6 +24,21 @@ public:
     int getY() const { return gridY; }
     int getRotation() const { return rotation; }
     Tetris::TetriminoType getType() const { return type; }
+    void setHold(bool h)
+    {
+        hold = h;
+        gridX = 4;
+        gridY = 0;
+    }
+    void resetRotation() { rotation = 0; }
+    bool tryMove(int dx, int dy);
+    bool tryDryMove(int dx, int dy);
+    bool collision(int testX, int testY);
+    size_t damageDealt(size_t linesCleared, bool isPerfectClear, bool isB2B, bool isTSpin, bool isAllSpin) const;
+    bool isAllSpin();
+    bool isTSpin();
+    bool AllSpin;
+    bool TSpin;
 
 private:
     // Properties
@@ -47,22 +62,6 @@ private:
         RIGHT = 1 };
     bool rotate(int direction); // 1 = CW, -1 = CCW
     void hardDrop();
-
-public:
-    void setHold(bool h)
-    {
-        hold = h;
-        gridX = 4;
-        gridY = 0;
-    }
-    void resetRotation() { rotation = 0; }
-    bool tryMove(int dx, int dy);
-    bool tryDryMove(int dx, int dy);
-    bool collision(int testX, int testY);
-    bool isAllSpin();
-    bool isTSpin();
-    bool AllSpin;
-    bool TSpin;
 };
 
 }

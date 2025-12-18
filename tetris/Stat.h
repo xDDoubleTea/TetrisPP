@@ -20,6 +20,8 @@ public:
     void update();
     void draw();
     void updatePieceStat(size_t lines_cleared, bool is_t_spin, bool is_pc, bool is_b2b, bool is_all_spin);
+    size_t getComboCount() const { return combo_count; }
+    size_t getBackToBackCount() const { return back_to_back_count; }
 
 private:
     size_t frames_played;

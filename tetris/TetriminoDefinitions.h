@@ -17,7 +17,7 @@ struct ColorRGB {
 };
 
 enum class TetriminoType {
-    O,
+    O = 0,
     S,
     Z,
     T,
