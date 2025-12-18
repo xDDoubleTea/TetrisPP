@@ -54,22 +54,25 @@ void Board::update()
     }
 }
 
-void Board::updateGravityTimer(bool rotated)
+void Board::updateGravityTimer(bool rotated, bool moved)
 {
     if (rotated) {
         gravityTimer = 0;
         return;
     }
-    gravityTimer++;
+    // gravityTimer++;
     if (gravityTimer >= gravitySpeed) {
         gravityTimer = 0;
         if (activePiece) {
+            if (moved) {
+                gravityTimer = 0;
+                return;
+            }
             if (!activePiece->tryMove(0, 1)) {
                 lockPiece(*activePiece);
             }
         }
     }
-    debug_log("Gravity Timer: %d/%d\n", gravityTimer, gravitySpeed);
 }
 bool Board::checkCollision(TetriminoType type, int rotation, int x, int y)
 {
@@ -106,16 +109,28 @@ void Board::lockPiece(const Tetrimino& t)
         }
     }
 
+    size_t linesCleared = clearLines();
+    DataCenter* DC = DataCenter::get_instance();
+    DC->stat->updatePieceStat(linesCleared, activePiece->TSpin, isPerfectClear(), (linesCleared == 4 || activePiece->AllSpin || activePiece->TSpin), activePiece->AllSpin);
     delete activePiece;
     activePiece = nullptr;
-
-    clearLines();
     spawnPiece();
 }
 
-void Board::clearLines()
+bool Board::isPerfectClear()
+{
+    for (int y = 0; y < GRID_H; y++) {
+        for (int x = 0; x < GRID_W; x++) {
+            if (grid[y][x] != 0)
+                return false;
+        }
+    }
+    return true;
+}
+size_t Board::clearLines()
 {
     // Standard naive line clear implementation
+    size_t linesCleared = 0;
     for (int y = GRID_H - 1; y >= 0; y--) {
         bool full = true;
         for (int x = 0; x < GRID_W; x++) {
@@ -126,6 +141,7 @@ void Board::clearLines()
         }
         if (full) {
             // Remove row and shift down
+            ++linesCleared;
             for (int ky = y; ky > 0; ky--) {
                 for (int kx = 0; kx < GRID_W; kx++) {
                     grid[ky][kx] = grid[ky - 1][kx];
@@ -137,12 +153,12 @@ void Board::clearLines()
             y++;
         }
     }
+    return linesCleared;
 }
 
 void Board::spawnPiece()
 {
-    // Simple random spawn for now (implement 7-bag later)
-    if (nextQueue.size() < 5) {
+    if (nextQueue.size() < NEXT_QUEUE_COUNT + 1) {
         generate7Bag();
     }
     activePiece = new Tetrimino(nextQueue.front()->getType());
@@ -183,8 +199,35 @@ void Board::draw()
     if (holdPiece) {
         drawHoldPiece(holdPiece->getType());
     }
+    if (!nextQueue.empty()) {
+        drawNextQueue(NEXT_QUEUE_COUNT);
+    }
 }
 
+void Board::drawNextQueue(int count)
+{
+    int offsetX = NEXT_QUEUE_OFFSET_X;
+    int offsetY = NEXT_QUEUE_OFFSET_Y;
+    std::queue<Tetrimino*> tempQueue = nextQueue;
+    for (int i = 0; i < count && !tempQueue.empty(); ++i) {
+        Tetrimino* t = tempQueue.front();
+        tempQueue.pop();
+        int typeIdx = static_cast<int>(t->getType());
+        ColorRGB c = tetrimino_colors[typeIdx];
+        ALLEGRO_COLOR color = al_map_rgb(c.r, c.g, c.b);
+        int pieceOffsetY = offsetY + i * NEXT_QUEUE_SPACING;
+        for (const auto& block : tetrimino_shapes[typeIdx][0]) {
+            int drawX = offsetX + (block.x + 1) * BLOCK_SIZE; // Centering
+            int drawY = pieceOffsetY + (block.y + 1) * BLOCK_SIZE;
+            al_draw_filled_rectangle(drawX, drawY,
+                drawX + BLOCK_SIZE, drawY + BLOCK_SIZE,
+                color);
+            al_draw_rectangle(drawX, drawY,
+                drawX + BLOCK_SIZE, drawY + BLOCK_SIZE,
+                al_map_rgb(0, 0, 0), 2);
+        }
+    }
+}
 void Board::drawHoldPiece(TetriminoType type)
 {
     if (type == TetriminoType::O && holdPiece == nullptr)
@@ -194,8 +237,8 @@ void Board::drawHoldPiece(TetriminoType type)
     ColorRGB c = tetrimino_colors[typeIdx];
     ALLEGRO_COLOR color = al_map_rgb(c.r, c.g, c.b);
 
-    int offsetX = BOARD_OFFSET_X - hold_piece_offset_x;
-    int offsetY = BOARD_OFFSET_Y + hold_piece_offset_y;
+    int offsetX = BOARD_OFFSET_X - HOLD_PIECE_OFFSET_X;
+    int offsetY = BOARD_OFFSET_Y + HOLD_PIECE_OFFSET_Y;
 
     for (const auto& block : tetrimino_shapes[typeIdx][0]) {
         int drawX = offsetX + (block.x + 1) * BLOCK_SIZE; // Centering
