@@ -1,5 +1,5 @@
 #include "Tetrimino.h"
-// #include "../Utils.h"
+#include "../Utils.h"
 #include "../data/DataCenter.h"
 #include "Board.h"
 #include "TetriminoDefinitions.h"
@@ -50,9 +50,9 @@ void Tetrimino::update(Board& board)
         dasTimer = 0;
         arrTimer = 0;
     }
-
+    bool moved = false;
     if (dx != 0) {
-        tryMove(dx, 0);
+        moved = tryMove(dx, 0);
     }
 
     // --- Rotation ---
@@ -69,7 +69,7 @@ void Tetrimino::update(Board& board)
     lockTimer = rotated ? 0 : lockTimer;
     // --- Soft Drop ---
     if (DC->key_state[ALLEGRO_KEY_DOWN]) {
-        if (tryMove(0, 1)) {
+        if ((moved |= tryMove(0, 1))) {
             lockTimer = 0; // Reset lock timer if we moved down
         }
     }
@@ -78,7 +78,12 @@ void Tetrimino::update(Board& board)
     if (DC->key_state[ALLEGRO_KEY_SPACE] && !DC->prev_key_state[ALLEGRO_KEY_SPACE]) {
         hardDrop();
     }
-    DC->board->updateGravityTimer(rotated);
+    DC->board->updateGravityTimer(rotated, moved);
+    if (rotated) {
+        AllSpin = isAllSpin();
+        TSpin = isTSpin();
+        debug_log("T-Spin: %d, All-Spin: %d\n", TSpin, AllSpin);
+    }
 }
 
 bool Tetrimino::tryMove(int dx, int dy)
@@ -90,6 +95,11 @@ bool Tetrimino::tryMove(int dx, int dy)
         return true;
     }
     return false;
+}
+bool Tetrimino::tryDryMove(int dx, int dy)
+{
+    DataCenter* DC = DataCenter::get_instance();
+    return !DC->board->checkCollision(type, rotation, gridX + dx, gridY + dy);
 }
 
 bool Tetrimino::rotate(int direction)
@@ -117,6 +127,46 @@ bool Tetrimino::rotate(int direction)
         }
     }
     return false;
+}
+
+bool Tetrimino::isTSpin()
+{
+    if (type != TetriminoType::T)
+        return false;
+
+    DataCenter* DC = DataCenter::get_instance();
+    int occupied_corners = 0;
+    // Check the four corners around the Tetrimino's center
+    std::array<Point, 4> corners = {
+        Point { gridX - 1, gridY - 1 }, // Top-left
+        Point { gridX + 1, gridY - 1 }, // Top-right
+        Point { gridX - 1, gridY + 1 }, // Bottom-left
+        Point { gridX + 1, gridY + 1 } // Bottom-right
+    };
+    for (const auto& corner : corners) {
+        if (DC->board->isOccupied(corner.x, corner.y)) {
+            occupied_corners++;
+        }
+    }
+    debug_log("T-Spin check: %d corners occupied.\n", occupied_corners);
+    return occupied_corners >= 3;
+}
+
+bool Tetrimino::isAllSpin()
+{
+    int occupied_corners = 0;
+    // Try moving the piece up, left, right to see if it's blocked on 3 sides
+    const std::vector<Point> check_offsets = {
+        Point { 0, -1 }, // Up
+        Point { -1, 0 }, // Left
+        Point { 1, 0 } // Right
+    };
+    for (const auto& offset : check_offsets) {
+        if (!tryDryMove(offset.x, offset.y))
+            occupied_corners++;
+    }
+    debug_log("All-Spin check: %d corners occupied.\n", occupied_corners);
+    return occupied_corners >= 3;
 }
 
 void Tetrimino::hardDrop()

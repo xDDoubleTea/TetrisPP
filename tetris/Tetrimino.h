@@ -39,7 +39,7 @@ private:
 
     // Movement Settings (Constants)
     static constexpr int DAS_DELAY = 10; // Frames before auto-repeat starts
-    static constexpr int ARR_DELAY = 1; // Frames between auto-repeats
+    static constexpr int ARR_DELAY = 0; // Frames between auto-repeats
     static constexpr int LOCK_DELAY = 60; // Frames before locking
 
     // Helpers
@@ -57,7 +57,12 @@ public:
     }
     void resetRotation() { rotation = 0; }
     bool tryMove(int dx, int dy);
+    bool tryDryMove(int dx, int dy);
     bool collision(int testX, int testY);
+    bool isAllSpin();
+    bool isTSpin();
+    bool AllSpin;
+    bool TSpin;
 };
 
 }
