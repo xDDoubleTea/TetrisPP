@@ -194,10 +194,11 @@ bool Game::game_update()
         //     debug_log("<Game> state: change to LEVEL\n");
         //     state = STATE::LEVEL;
         // }
-        if (true) {
+        if (DC->key_state[ALLEGRO_KEY_ENTER] && !DC->prev_key_state[ALLEGRO_KEY_ENTER]) {
             debug_log("<Game> state: change to LEVEL\n");
             state = STATE::LEVEL;
         }
+
         break;
     }
     case STATE::LEVEL: {
