@@ -26,7 +26,7 @@ enum class TetriminoType {
     L,
 };
 
-constexpr size_t NUM_TYPES = 7;
+constexpr size_t NUM_TYPES = 8;
 constexpr size_t ROTATION_STATES = 4;
 constexpr size_t BLOCKS_PER_TETRIMINO = 4;
 constexpr size_t KICK_TESTS = 5;
@@ -40,6 +40,7 @@ constexpr std::array<ColorRGB, NUM_TYPES> tetrimino_colors = {
         { 78, 207, 158 },
         { 96, 78, 181 },
         { 199, 177, 67 },
+        { 100, 100, 100 },
     },
 };
 constexpr std::array<ColorRGB, NUM_TYPES> tetrimino_ghost_block_colors = {
