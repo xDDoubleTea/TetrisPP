@@ -2,7 +2,7 @@
 #include "Utils.h"
 #include "data/DataCenter.h"
 #include "data/FontCenter.h"
-// #include "data/ImageCenter.h"
+#include "data/ImageCenter.h"
 #include "data/OperationCenter.h"
 #include "data/SoundCenter.h"
 #include <allegro5/allegro_acodec.h>
@@ -11,14 +11,16 @@
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_ttf.h>
 #include <cstring>
-#include <iostream>
 // #include <vector>
 
 // fixed settings
 // constexpr char game_icon_img_path[] = "./assets/image/game_icon.png";
 // constexpr char game_start_sound_path[] = "./assets/sound/growl.wav";
-// constexpr char background_img_path[] = "./assets/image/StartBackground.jpg";
-// constexpr char background_sound_path[] = "./assets/sound/BackgroundMusic.ogg";
+constexpr char game_menu_sound_path[] = "./assets/music/menu.wav";
+constexpr char background_img_path[] = "./assets/background/pvzbg.png";
+constexpr char background_sound_path[] = "./assets/music/PVZBGM.wav";
+constexpr char game_over_img_path[] = "./assets/background/gameover.jpg";
+constexpr char game_over_sound_path[] = "./assets/music/gameover_sound.wav";
 
 /**
  * @brief Game entry.
@@ -124,7 +126,7 @@ void Game::game_init()
 {
     DataCenter* DC = DataCenter::get_instance();
     SoundCenter* SC = SoundCenter::get_instance();
-    // ImageCenter* IC = ImageCenter::get_instance();
+    ImageCenter* IC = ImageCenter::get_instance();
     FontCenter* FC = FontCenter::get_instance();
     // set window icon
     // game_icon = IC->get(game_icon_img_path);
@@ -150,18 +152,27 @@ void Game::game_init()
     stat = new Tetris::Stat();
     DC->stat = stat;
 
+    startButton = new Button(DC->window_width / 2.0 - 250, DC->window_height / 2.0, 500, 100, "Start Game");
+    startButton->setFont(FC->courier_new[FontSize::MEDIUM]);
+    startButton->setOnClickCallback(
+        [this]() {
+            debug_log("<Game> state: change to LEVEL\n");
+            this->state = STATE::LEVEL;
+        });
     if (board)
         delete board;
     debug_log("Initializing Board...\n");
     board = new Tetris::Board();
 
-    std::cout << "Board address in Game::game_init(): " << board << std::endl;
-    board->init();
     debug_log("Board initialized.\n");
     DC->board = board;
+    // TEST
+    // DC->add_pea(new Pea(5));
+    DC->add_zombie(new Zombie());
+    DC->peaShooter = new PeaShooter();
 
     // game start
-    // background = IC->get(background_img_path);
+    background = IC->get(background_img_path);
     debug_log("Game state: change to START\n");
     state = STATE::START;
     al_start_timer(timer);
@@ -179,7 +190,12 @@ bool Game::game_update()
     DataCenter* DC = DataCenter::get_instance();
     OperationCenter* OC = OperationCenter::get_instance();
     SoundCenter* SC = SoundCenter::get_instance();
+    static ALLEGRO_SAMPLE_INSTANCE* game_start_sound = nullptr;
     static ALLEGRO_SAMPLE_INSTANCE* background = nullptr;
+    static ALLEGRO_SAMPLE_INSTANCE* game_over_sound = nullptr;
+    // ImageCenter* IC = ImageCenter::get_instance();
+    static bool game_menu_BGM_played = false;
+    static bool main_BGM_played = false;
 
     switch (state) {
     case STATE::START: {
@@ -194,34 +210,46 @@ bool Game::game_update()
         //     debug_log("<Game> state: change to LEVEL\n");
         //     state = STATE::LEVEL;
         // }
-        if (DC->key_state[ALLEGRO_KEY_ENTER] && !DC->prev_key_state[ALLEGRO_KEY_ENTER]) {
-            debug_log("<Game> state: change to LEVEL\n");
-            state = STATE::LEVEL;
+        if (!game_menu_BGM_played) {
+            game_start_sound = SC->play(game_menu_sound_path, ALLEGRO_PLAYMODE_LOOP);
+            game_menu_BGM_played = true;
         }
+
+        if (startButton)
+            startButton->update();
+        else
+            GAME_ASSERT(false, "Start Button is not initialized.");
 
         break;
     }
     case STATE::LEVEL: {
-        // static bool BGM_played = false;
-        // if (!BGM_played) {
-        //     background = SC->play(background_sound_path, ALLEGRO_PLAYMODE_LOOP);
-        //     BGM_played = true;
-        // }
+        if (game_menu_BGM_played) {
+            SC->toggle_playing(game_start_sound);
+            game_menu_BGM_played = false;
+        }
 
+        if (!main_BGM_played) {
+            background = SC->play(background_sound_path, ALLEGRO_PLAYMODE_LOOP);
+            main_BGM_played = true;
+        }
         if (DC->key_state[ALLEGRO_KEY_P] && !DC->prev_key_state[ALLEGRO_KEY_P]) {
             SC->toggle_playing(background);
             debug_log("<Game> state: change to PAUSE\n");
             state = STATE::PAUSE;
         }
-        if (board)
-            board->update();
-        else
+        if (board) {
+            if (!board->update()) {
+                debug_log("<Game> state: change to END\n");
+                state = STATE::END;
+            }
+        } else {
             GAME_ASSERT(false, "Board is not initialized.");
+        }
+
         if (stat)
             stat->update();
         else
             GAME_ASSERT(false, "Stat is not initialized.");
-
         // if (true) {
         //     debug_log("<Game> state: change to END\n");
         //     state = STATE::END;
@@ -237,7 +265,16 @@ bool Game::game_update()
         break;
     }
     case STATE::END: {
-        return false;
+        if (SC->is_playing(background))
+            SC->toggle_playing(background);
+        if (!game_over_sound) {
+            game_over_sound = SC->play(game_over_sound_path, ALLEGRO_PLAYMODE_ONCE);
+        }
+
+        if (DC->key_state[ALLEGRO_KEY_ENTER] && !DC->prev_key_state[ALLEGRO_KEY_ENTER]) {
+            debug_log("<Game> Exiting game from END state.\n");
+            return false;
+        }
     }
     }
     // If the game is not paused, we should progress update.
@@ -263,12 +300,12 @@ void Game::game_draw()
     DataCenter* DC = DataCenter::get_instance();
     OperationCenter* OC = OperationCenter::get_instance();
     FontCenter* FC = FontCenter::get_instance();
+    ImageCenter* IC = ImageCenter::get_instance();
 
     // Flush the screen first.
     al_clear_to_color(al_map_rgb(0, 0, 0));
     if (state != STATE::END) {
         // background
-        // al_draw_bitmap(background, 0, 0, 0);
         // if (DC->game_field_length < DC->window_width)
         //     al_draw_filled_rectangle(DC->game_field_length, 0, DC->window_width,
         //         DC->window_height, al_map_rgb(100, 100, 100));
@@ -277,12 +314,12 @@ void Game::game_draw()
         //         DC->window_height, al_map_rgb(100, 100, 100));
         // user interface
         if (state != STATE::START) {
-            ui->draw();
-            OC->draw();
             if (board)
                 board->draw();
             else
                 GAME_ASSERT(false, "Board is not initialized.");
+            ui->draw();
+            OC->draw();
             if (stat) {
                 stat->draw();
             } else {
@@ -292,7 +329,9 @@ void Game::game_draw()
     }
     switch (state) {
     case STATE::START: {
+        al_draw_bitmap(background, 0, 0, 0);
         ui->drawStartScreen();
+        startButton->draw();
     }
     case STATE::LEVEL: {
         break;
@@ -307,6 +346,10 @@ void Game::game_draw()
         break;
     }
     case STATE::END: {
+        ALLEGRO_BITMAP* gameover = IC->get(game_over_img_path);
+        al_draw_scaled_bitmap(gameover, 0, 0, al_get_bitmap_width(gameover), al_get_bitmap_height(gameover),
+            0, 0, DC->window_width, DC->window_height, 0);
+        break;
     }
     }
     al_flip_display();

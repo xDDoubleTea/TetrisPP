@@ -5,7 +5,7 @@ using namespace std;
 
 // fixed settings
 namespace SoundSetting {
-constexpr int RESERVED_SAMPLES = 16;
+constexpr int RESERVED_SAMPLES = 256;
 constexpr int UPDATE_PERIOD = 60;
 }
 

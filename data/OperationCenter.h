@@ -27,16 +27,14 @@ private:
     OperationCenter() { }
 
 private:
-    void _update_monster();
-    void _update_tower();
-    void _update_towerBullet();
-    void _update_monster_towerBullet();
-    void _update_monster_player();
+    void _update_pea();
+    void _update_zombie();
 
 private:
-    void _draw_monster();
-    void _draw_tower();
-    void _draw_towerBullet();
+    void _draw_zombie();
+    void _draw_pea();
+    void _draw_pea_shooter();
+    int zombie_spawn_timer = 0;
 };
 
 #endif

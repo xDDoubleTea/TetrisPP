@@ -137,4 +137,5 @@ constexpr std::array<std::array<std::array<Point, KICK_TESTS>, ROTATION_STATES>,
         { { { 0, 1 }, { 0, 1 }, { 0, 1 }, { 0, -1 }, { 0, 2 } } } // 3
     } } } };
 }
+
 #endif

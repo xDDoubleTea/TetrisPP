@@ -25,6 +25,10 @@ public:
     bool erase_sample(const std::string& path);
     ALLEGRO_SAMPLE_INSTANCE* play(const std::string& path, ALLEGRO_PLAYMODE mode);
     bool is_playing(const ALLEGRO_SAMPLE_INSTANCE* const inst);
+    bool is_playing(const std::string& path)
+    {
+        return samples.find(path) != samples.end() && !samples[path].second.empty();
+    }
     void toggle_playing(ALLEGRO_SAMPLE_INSTANCE* inst);
 
 private:

@@ -9,10 +9,10 @@ class Tetrimino;
 class Board;
 class Stat {
 private:
-    constexpr static int STAT_OFFSET_X = Board::BOARD_OFFSET_X;
+    constexpr static int STAT_OFFSET_X = Board::BOARD_OFFSET_X + Board::GRID_W / 2 * Board::BLOCK_SIZE;
     constexpr static int STAT_OFFSET_Y = Board::BOARD_OFFSET_Y + Board::GRID_H * Board::BLOCK_SIZE + 20;
     constexpr static int STAT_SPACING_Y = 30;
-    constexpr static ColorRGB STAT_TEXT_COLOR = { 255, 255, 255 };
+    constexpr static ColorRGB STAT_TEXT_COLOR = { 123, 255, 100 };
 
 public:
     Stat();

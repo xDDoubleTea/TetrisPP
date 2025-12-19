@@ -24,13 +24,14 @@ public:
 
 public:
     Board();
+    ~Board();
     void init();
-    void update();
+    bool update();
     void draw();
 
     // Game Logic
     bool checkCollision(Tetris::TetriminoType type, int rotation, int x, int y);
-    void lockPiece(const Tetrimino& t);
+    bool lockPiece(const Tetrimino& t);
 
     // Getters for Tetrimino ghost calculations
     bool isOccupied(int x, int y) const;
@@ -46,7 +47,23 @@ public:
     // Draw decorations
     void drawDecorations();
 
+    void drawLineClearTypes();
+    void toggleDrawLineClearTypes() { drawLineClearTypes_enabled = !drawLineClearTypes_enabled; }
+    void getLineClearTypeDrawEnabled(bool& out_enabled) const { out_enabled = drawLineClearTypes_enabled; }
+
+    void setLastLineClearInfo(TetriminoType type, size_t lines, bool isSpin, bool isB2B)
+    {
+        lastClearedType = type;
+        lastClearedLines = lines;
+        lastClearWasSpin = isSpin;
+        lastClearWasB2B = isB2B;
+    }
+
+    void sendAttack(size_t damage);
+
+    void receiveGarbage(size_t damage) { garbageQueue += damage; }
     void addGarbageLines(size_t count);
+    bool gameOver() const;
 
 private:
     // The main grid: 0 = empty, 1-7 = colors/types
@@ -61,7 +78,7 @@ private:
     int gravityTimer;
     int gravitySpeed; // Frames per drop (lower is faster)
 
-    void spawnPiece();
+    bool spawnPiece();
     size_t clearLines();
     bool isPerfectClear();
     void generate7Bag(); // Fills nextQueue
@@ -69,6 +86,17 @@ private:
     // Garbage
     size_t garbageQueue = 0;
     Shape* hitbox;
+
+    bool drawLineClearTypes_enabled = false;
+
+    // Decorations
+    ALLEGRO_BITMAP* background;
+    TetriminoType lastClearedType;
+    size_t lastClearedLines;
+    bool lastClearWasSpin;
+    bool lastClearWasB2B;
+
+    ColorRGB font_color = { 123, 255, 100 };
 };
 }
 

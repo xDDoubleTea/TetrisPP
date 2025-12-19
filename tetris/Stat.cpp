@@ -53,10 +53,12 @@ void Stat::updatePieceStat(size_t lines_cleared, bool is_t_spin, bool is_pc, boo
     all_spins += static_cast<int>(is_all_spin);
     t_spins += static_cast<int>(is_t_spin);
     perfect_clears += static_cast<int>(is_pc);
-    if (is_b2b)
+
+    if (is_b2b && lines_cleared > 0)
         back_to_back_count++;
-    else
+    else if (!is_b2b && lines_cleared > 0)
         back_to_back_count = 0;
+
     if (combo_count > 0 && lines_cleared > 0)
         combo_count++;
     else

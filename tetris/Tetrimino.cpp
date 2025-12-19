@@ -1,8 +1,10 @@
 #include "Tetrimino.h"
 #include "../Utils.h"
 #include "../data/DataCenter.h"
+#include "../data/SoundCenter.h"
 #include "Board.h"
 #include "TetriminoDefinitions.h"
+#include <allegro5/allegro_audio.h>
 // #include <cmath>
 
 using namespace Tetris;
@@ -20,13 +22,14 @@ Tetrimino::Tetrimino(TetriminoType t)
     // Adjust Y if you want it to spawn hidden above the board
 }
 
-void Tetrimino::update(Board& board)
+bool Tetrimino::update(Board& board)
 {
     DataCenter* DC = DataCenter::get_instance();
 
     // --- Horizontal Movement (DAS/ARR) ---
     int dx = 0;
     if (DC->key_state[ALLEGRO_KEY_LEFT]) {
+        playMovingSound(type);
         if (dasTimer == 0 || dasTimer >= DAS_DELAY) {
             if (arrTimer == 0) {
                 dx = -1;
@@ -37,6 +40,7 @@ void Tetrimino::update(Board& board)
         }
         dasTimer++;
     } else if (DC->key_state[ALLEGRO_KEY_RIGHT]) {
+        playMovingSound(type);
         if (dasTimer == 0 || dasTimer >= DAS_DELAY) {
             if (arrTimer == 0) {
                 dx = 1;
@@ -75,16 +79,58 @@ void Tetrimino::update(Board& board)
     }
 
     // --- Hard Drop ---
+    bool lockPiece = true;
     if (DC->key_state[ALLEGRO_KEY_SPACE] && !DC->prev_key_state[ALLEGRO_KEY_SPACE]) {
         hardDrop();
+        lockPiece = DC->board->lockPiece(*this);
     }
     DC->board->updateGravityTimer(rotated, moved);
     if (rotated) {
         AllSpin = isAllSpin();
         TSpin = isTSpin();
-        // debug_log("T-Spin: %d, All-Spin: %d\n", TSpin, AllSpin);
+        SoundCenter* SC = SoundCenter::get_instance();
+        if (TSpin || AllSpin)
+            SC->play(DataSettings::spin_sound_path, ALLEGRO_PLAYMODE_ONCE);
+    } else if (moved) {
+        AllSpin = false;
+        TSpin = false;
     }
-    DC->board->updateGravityTimer(rotated);
+    return lockPiece;
+}
+
+void Tetrimino::playMovingSound(TetriminoType type)
+{
+    SoundCenter* SC = SoundCenter::get_instance();
+    switch (type) {
+    case TetriminoType::I:
+        if (!SC->is_playing(DataSettings::i_sound_path))
+            SC->play(DataSettings::i_sound_path, ALLEGRO_PLAYMODE_ONCE);
+        break;
+    case TetriminoType::J:
+        if (!SC->is_playing(DataSettings::j_sound_path))
+            SC->play(DataSettings::j_sound_path, ALLEGRO_PLAYMODE_ONCE);
+        break;
+    case TetriminoType::L:
+        if (!SC->is_playing(DataSettings::l_sound_path))
+            SC->play(DataSettings::l_sound_path, ALLEGRO_PLAYMODE_ONCE);
+        break;
+    case TetriminoType::O:
+        if (!SC->is_playing(DataSettings::o_sound_path))
+            SC->play(DataSettings::o_sound_path, ALLEGRO_PLAYMODE_ONCE);
+        break;
+    case TetriminoType::S:
+        if (!SC->is_playing(DataSettings::s_sound_path))
+            SC->play(DataSettings::s_sound_path, ALLEGRO_PLAYMODE_ONCE);
+        break;
+    case TetriminoType::T:
+        if (!SC->is_playing(DataSettings::t_sound_path))
+            SC->play(DataSettings::t_sound_path, ALLEGRO_PLAYMODE_ONCE);
+        break;
+    case TetriminoType::Z:
+        if (!SC->is_playing(DataSettings::z_sound_path))
+            SC->play(DataSettings::z_sound_path, ALLEGRO_PLAYMODE_ONCE);
+        break;
+    }
 }
 
 bool Tetrimino::tryMove(int dx, int dy)
@@ -110,10 +156,12 @@ bool Tetrimino::rotate(int direction)
     int newRot = (rotation + direction + 4) % 4; // Wrap around 0-3
 
     DataCenter* DC = DataCenter::get_instance();
+    SoundCenter* SC = SoundCenter::get_instance();
     // Basic Rotation
 
     // Wall Kicks (SRS)
 
+    SC->play(DataSettings::rotate_sound_path, ALLEGRO_PLAYMODE_ONCE);
     int tableIdx = (type == TetriminoType::I) ? 1 : 0;
     for (int i = 0; i < 5; ++i) {
         int temp_check_coord_x = gridX;
@@ -132,25 +180,7 @@ bool Tetrimino::rotate(int direction)
 
 bool Tetrimino::isTSpin()
 {
-    if (type != TetriminoType::T)
-        return false;
-
-    DataCenter* DC = DataCenter::get_instance();
-    int occupied_corners = 0;
-    // Check the four corners around the Tetrimino's center
-    std::array<Point, 4> corners = {
-        Point { gridX - 1, gridY - 1 }, // Top-left
-        Point { gridX + 1, gridY - 1 }, // Top-right
-        Point { gridX - 1, gridY + 1 }, // Bottom-left
-        Point { gridX + 1, gridY + 1 } // Bottom-right
-    };
-    for (const auto& corner : corners) {
-        if (DC->board->isOccupied(corner.x, corner.y)) {
-            occupied_corners++;
-        }
-    }
-    // debug_log("T-Spin check: %d corners occupied.\n", occupied_corners);
-    return occupied_corners >= 3;
+    return type == TetriminoType::T && isAllSpin();
 }
 
 bool Tetrimino::isAllSpin()
@@ -172,10 +202,10 @@ bool Tetrimino::isAllSpin()
 
 void Tetrimino::hardDrop()
 {
-    DataCenter* DC = DataCenter::get_instance();
     while (tryMove(0, 1))
         ;
-    DC->board->lockPiece(*this);
+    SoundCenter* SC = SoundCenter::get_instance();
+    SC->play(DataSettings::harddrop_sound_path, ALLEGRO_PLAYMODE_ONCE);
 }
 
 bool Tetrimino::collision(int testX, int testY)
@@ -184,8 +214,9 @@ bool Tetrimino::collision(int testX, int testY)
     return DC->board->checkCollision(type, rotation, testX, testY);
 }
 
-size_t Tetrimino::damageDealt(size_t linesCleared, bool isPerfectClear, bool isB2B, bool isTSpin, bool isAllSpin) const
+size_t Tetrimino::damageDealt(size_t linesCleared, bool isPerfectClear, bool isB2B, bool isTSpin, bool isAllSpin, size_t combo) const
 {
+    SoundCenter* SC = SoundCenter::get_instance();
     size_t damage = 0;
     if (!linesCleared)
         return 0;
@@ -193,6 +224,7 @@ size_t Tetrimino::damageDealt(size_t linesCleared, bool isPerfectClear, bool isB
         damage += 10; // Perfect Clear bonus
     }
     if (isTSpin) {
+        SC->play(DataSettings::clearspin_sound_path, ALLEGRO_PLAYMODE_ONCE);
         switch (linesCleared) {
         case 1:
             damage += 2;
@@ -207,6 +239,7 @@ size_t Tetrimino::damageDealt(size_t linesCleared, bool isPerfectClear, bool isB
             break;
         }
     } else if (isAllSpin) {
+        SC->play(DataSettings::clearspin_sound_path, ALLEGRO_PLAYMODE_ONCE);
         switch (linesCleared) {
         case 1:
             damage += 1;
@@ -223,22 +256,37 @@ size_t Tetrimino::damageDealt(size_t linesCleared, bool isPerfectClear, bool isB
     } else {
         switch (linesCleared) {
         case 1:
+            SC->play(DataSettings::clearline_sound_path, ALLEGRO_PLAYMODE_ONCE);
             damage += 0;
             break;
         case 2:
+            SC->play(DataSettings::clearline_sound_path, ALLEGRO_PLAYMODE_ONCE);
             damage += 1;
             break;
         case 3:
             damage += 2;
+            SC->play(DataSettings::clearline_sound_path, ALLEGRO_PLAYMODE_ONCE);
             break;
         case 4:
             damage += 4;
+            SC->play(DataSettings::clearquad_sound_path, ALLEGRO_PLAYMODE_ONCE);
             break;
         default:
             break;
         }
     }
+    // Combo bonus
+    if (linesCleared == 1 && combo >= 2) {
+        damage += log(1 + 1.25 * combo);
+    }
+    damage += (linesCleared - 1) * (1 + combo / 4);
     DataCenter* DC = DataCenter::get_instance();
+
+    bool out_enabled = false;
+    DC->board->getLineClearTypeDrawEnabled(out_enabled);
+    if (!out_enabled) {
+        DC->board->toggleDrawLineClearTypes();
+    }
     size_t b2b = DC->stat->getBackToBackCount();
     if (b2b == 0 || b2b == 1) {
         // No B2B bonus
@@ -247,6 +295,8 @@ size_t Tetrimino::damageDealt(size_t linesCleared, bool isPerfectClear, bool isB
     } else {
         damage += 2;
     }
+    DC->board->setLastLineClearInfo(type, linesCleared, isTSpin || isAllSpin, b2b);
+
     return damage;
 }
 
