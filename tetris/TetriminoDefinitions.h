@@ -3,7 +3,7 @@
 
 #include <allegro5/allegro_color.h>
 #include <array>
-#include <sys/types.h>
+#include <cstdint>
 
 namespace Tetris {
 
@@ -13,7 +13,7 @@ struct Point {
 };
 
 struct ColorRGB {
-    u_int8_t r, g, b;
+    uint8_t r, g, b;
 };
 
 enum class TetriminoType {

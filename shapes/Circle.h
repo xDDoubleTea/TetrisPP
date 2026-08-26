@@ -13,7 +13,7 @@ public:
     double center_y() const { return y; }
     void update_center_x(const double& x) { this->x = x; }
     void update_center_y(const double& y) { this->y = y; }
-    const ShapeType getType() const { return ShapeType::CIRCLE; }
+    ShapeType getType() const { return ShapeType::CIRCLE; }
 
 public:
     Circle() { }

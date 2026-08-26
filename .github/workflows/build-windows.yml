@@ -8,38 +8,38 @@ on:
       - "**/*.c"
       - "**/*.hpp"
       - "**/*.h"
+      - "Makefile"
+      - "scripts/**"
+      - ".github/workflows/**"
+  pull_request:
   workflow_dispatch:
 
 jobs:
   build-windows:
     runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
 
     steps:
-    - name: setup env
-      run: echo "$(Get-Location)\MinGW\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
-
-    - name: check env
-      run: echo $env:PATH
-
-    - name: download MinGW-w64-8.1.0
-      run: Invoke-WebRequest http://140.114.85.195/public/upload/5d2079de0c/MinGW-w64-8.1.0.zip -OutFile MinGW-w64-8.1.0.zip
-    - name: unzip MinGW-w64-8.1.0
-      run: Expand-Archive MinGW-w64-8.1.0.zip MinGW
-
-    - name: download allegro-5.2.7.0
-      run: Invoke-WebRequest https://github.com/liballeg/allegro5/releases/download/5.2.7.0/allegro-x86_64-w64-mingw32-gcc-10.2.0-posix-seh-static-5.2.7.0.zip -OutFile allegro.zip
-    - name: unzip allegro-5.2.7.0
-      run: Expand-Archive allegro.zip ./
-
     - uses: actions/checkout@v4
+
+    - uses: msys2/setup-msys2@v2
       with:
-        path: SourceCode
+        msystem: UCRT64
+        update: true
+        install: >-
+          make
+        pacboy: >-
+          gcc:p
+          pkgconf:p
+          allegro:p
+
+    - name: show allegro version
+      run: pkg-config --modversion allegro-5
 
     - name: build
-      run: cd SourceCode && make
-
-    - name: check build
-      run: ls SourceCode/game.exe
+      run: make
 
     - name: run test mode
-      run: SourceCode/game.exe --test
+      run: ./game.exe --test

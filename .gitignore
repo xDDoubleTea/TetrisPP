@@ -1,9 +1,15 @@
-.gitignore
+# editor / tooling
 .vscode
-doxy_file
-*.o
-*.exe
-*.log
-game
 .cache/clangd/index
+compile_commands.json
+doxy_file
+
+# build output
+build/
+game
+*.o
+*.d
+*.exe
+*.out
+*.log
 a.out.dSYM/Contents

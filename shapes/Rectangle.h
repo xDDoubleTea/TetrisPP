@@ -21,7 +21,7 @@ public:
         double dy = y - center_y();
         y1 += dy, y2 += dy;
     }
-    const ShapeType getType() const { return ShapeType::RECTANGLE; }
+    ShapeType getType() const { return ShapeType::RECTANGLE; }
 
 public:
     Rectangle() { }
