@@ -69,31 +69,31 @@ void Stat::draw()
 {
     FontCenter* FC = FontCenter::get_instance();
 
-    al_draw_textf(FC->courier_new[FontSize::MEDIUM], al_map_rgb(STAT_TEXT_COLOR.r, STAT_TEXT_COLOR.g, STAT_TEXT_COLOR.b),
+    al_draw_textf(FC->mono[FontSize::MEDIUM], al_map_rgb(STAT_TEXT_COLOR.r, STAT_TEXT_COLOR.g, STAT_TEXT_COLOR.b),
         Stat::STAT_OFFSET_X, Stat::STAT_OFFSET_Y,
         ALLEGRO_ALIGN_CENTER,
         "Lines Cleared: %u", static_cast<unsigned>(total_lines_cleared));
-    al_draw_textf(FC->courier_new[FontSize::MEDIUM], al_map_rgb(STAT_TEXT_COLOR.r, STAT_TEXT_COLOR.g, STAT_TEXT_COLOR.b),
+    al_draw_textf(FC->mono[FontSize::MEDIUM], al_map_rgb(STAT_TEXT_COLOR.r, STAT_TEXT_COLOR.g, STAT_TEXT_COLOR.b),
         Stat::STAT_OFFSET_X, Stat::STAT_OFFSET_Y + Stat::STAT_SPACING_Y,
         ALLEGRO_ALIGN_CENTER,
         "Time Played: %u s", static_cast<unsigned>(time_played_seconds));
-    al_draw_textf(FC->courier_new[FontSize::MEDIUM], al_map_rgb(STAT_TEXT_COLOR.r, STAT_TEXT_COLOR.g, STAT_TEXT_COLOR.b),
+    al_draw_textf(FC->mono[FontSize::MEDIUM], al_map_rgb(STAT_TEXT_COLOR.r, STAT_TEXT_COLOR.g, STAT_TEXT_COLOR.b),
         Stat::STAT_OFFSET_X, Stat::STAT_OFFSET_Y + 2 * Stat::STAT_SPACING_Y,
         ALLEGRO_ALIGN_CENTER,
         "Pieces Placed: %u", static_cast<unsigned>(pieces_placed));
-    al_draw_textf(FC->courier_new[FontSize::MEDIUM], al_map_rgb(STAT_TEXT_COLOR.r, STAT_TEXT_COLOR.g, STAT_TEXT_COLOR.b),
+    al_draw_textf(FC->mono[FontSize::MEDIUM], al_map_rgb(STAT_TEXT_COLOR.r, STAT_TEXT_COLOR.g, STAT_TEXT_COLOR.b),
         Stat::STAT_OFFSET_X, Stat::STAT_OFFSET_Y + 3 * Stat::STAT_SPACING_Y,
         ALLEGRO_ALIGN_CENTER,
         "APM: %.2f", APM);
-    al_draw_textf(FC->courier_new[FontSize::MEDIUM], al_map_rgb(STAT_TEXT_COLOR.r, STAT_TEXT_COLOR.g, STAT_TEXT_COLOR.b),
+    al_draw_textf(FC->mono[FontSize::MEDIUM], al_map_rgb(STAT_TEXT_COLOR.r, STAT_TEXT_COLOR.g, STAT_TEXT_COLOR.b),
         Stat::STAT_OFFSET_X, Stat::STAT_OFFSET_Y + 4 * Stat::STAT_SPACING_Y,
         ALLEGRO_ALIGN_CENTER,
         "PPS: %.2f", PPS);
-    al_draw_textf(FC->courier_new[FontSize::MEDIUM], al_map_rgb(STAT_TEXT_COLOR.r, STAT_TEXT_COLOR.g, STAT_TEXT_COLOR.b),
+    al_draw_textf(FC->mono[FontSize::MEDIUM], al_map_rgb(STAT_TEXT_COLOR.r, STAT_TEXT_COLOR.g, STAT_TEXT_COLOR.b),
         Stat::STAT_OFFSET_X, Stat::STAT_OFFSET_Y + 5 * Stat::STAT_SPACING_Y,
         ALLEGRO_ALIGN_CENTER,
         "Attacks Sent: %u", static_cast<unsigned>(attacks_sent));
-    al_draw_textf(FC->courier_new[FontSize::MEDIUM], al_map_rgb(STAT_TEXT_COLOR.r, STAT_TEXT_COLOR.g, STAT_TEXT_COLOR.b),
+    al_draw_textf(FC->mono[FontSize::MEDIUM], al_map_rgb(STAT_TEXT_COLOR.r, STAT_TEXT_COLOR.g, STAT_TEXT_COLOR.b),
         Stat::STAT_OFFSET_X, Stat::STAT_OFFSET_Y + 6 * Stat::STAT_SPACING_Y,
         ALLEGRO_ALIGN_CENTER,
         "APP: %.2f", APP);

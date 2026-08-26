@@ -20,7 +20,7 @@ void Zombie::init()
 {
     FontCenter* FC = FontCenter::get_instance();
     DataCenter* DC = DataCenter::get_instance();
-    font = FC->courier_new[FontSize::MEDIUM];
+    font = FC->mono[FontSize::MEDIUM];
     attackspeed = DC->FPS * 3; // Attack every 2 seconds
     walk_animation = algif_load_animation("assets/gifs/plants-vs-zombies-zombie.gif");
     attack_animation = algif_load_animation("assets/gifs/pvz-zombieatt.gif");
@@ -67,20 +67,18 @@ bool Zombie::update()
 
 void Zombie::draw()
 {
-    if (state == STATE::WALKING) {
-        ALLEGRO_BITMAP* frame = algif_get_bitmap(walk_animation, al_get_time());
-        if (frame == NULL)
-            return;
-        al_draw_scaled_bitmap(frame, 0, 0, al_get_bitmap_width(frame), al_get_bitmap_height(frame), x1,
-            y1, x2 - x1, y2 - y1, 0);
-        // Display HP
+    // A missing animation only costs the sprite; the HP readout below still draws.
+    ALGIF_ANIMATION* animation = nullptr;
+    if (state == STATE::WALKING)
+        animation = walk_animation;
+    else if (state == STATE::ATTACKING)
+        animation = attack_animation;
 
-    } else if (state == STATE::ATTACKING) {
-        ALLEGRO_BITMAP* frame = algif_get_bitmap(attack_animation, al_get_time());
-        if (frame == NULL)
-            return;
-        al_draw_scaled_bitmap(frame, 0, 0, al_get_bitmap_width(frame), al_get_bitmap_height(frame), x1,
-            y1, x2 - x1, y2 - y1, 0);
+    if (animation) {
+        ALLEGRO_BITMAP* frame = algif_get_bitmap(animation, al_get_time());
+        if (frame)
+            al_draw_scaled_bitmap(frame, 0, 0, al_get_bitmap_width(frame), al_get_bitmap_height(frame),
+                x1, y1, x2 - x1, y2 - y1, 0);
     }
     al_draw_text(font, al_map_rgb(255, 0, 0), (x1 + x2) / 2.0, y1 - 20, ALLEGRO_ALIGN_CENTRE,
         ("HP: " + std::to_string(hp)).c_str());
@@ -92,7 +90,9 @@ void Zombie::draw()
 
 Zombie::~Zombie()
 {
-    algif_destroy_animation(walk_animation);
-    algif_destroy_animation(attack_animation);
+    if (walk_animation)
+        algif_destroy_animation(walk_animation);
+    if (attack_animation)
+        algif_destroy_animation(attack_animation);
     delete hitbox;
 }

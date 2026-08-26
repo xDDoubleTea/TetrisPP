@@ -18,7 +18,8 @@ SoundCenter::~SoundCenter()
 {
     for (auto& [path, sample_pair] : samples) {
         auto& [sample, insts] = sample_pair;
-        al_destroy_sample(sample);
+        if (sample)
+            al_destroy_sample(sample);
         for (ALLEGRO_SAMPLE_INSTANCE* inst : insts)
             al_destroy_sample_instance(inst);
     }
@@ -84,7 +85,8 @@ bool SoundCenter::erase_sample(const std::string& path)
         al_destroy_sample_instance(inst);
     }
     insts.clear();
-    al_destroy_sample(sample);
+    if (sample)
+        al_destroy_sample(sample);
     return true;
 }
 
@@ -100,11 +102,18 @@ SoundCenter::play(const string& path, ALLEGRO_PLAYMODE mode)
 {
     auto it = samples.find(path);
     if (it == samples.end()) {
+        // A missing audio file is not fatal: the sample is cached as null and
+        // every later play of the same path becomes a no-op, so the game runs
+        // silently rather than terminating.
         ALLEGRO_SAMPLE* sample = al_load_sample(path.c_str());
-        GAME_ASSERT(sample != nullptr, "cannot find sample: %s.", path.c_str());
+        if (!sample) {
+            debug_log("<SoundCenter> cannot find sample: %s, playing silently.\n", path.c_str());
+        }
         it = samples.insert({ path, { sample, {} } }).first;
     }
     auto& [sample, insts] = it->second;
+    if (!sample)
+        return nullptr;
     ALLEGRO_SAMPLE_INSTANCE* instance = al_create_sample_instance(sample);
     insts.emplace_back(instance);
 
@@ -119,6 +128,8 @@ SoundCenter::play(const string& path, ALLEGRO_PLAYMODE mode)
  */
 bool SoundCenter::is_playing(const ALLEGRO_SAMPLE_INSTANCE* const inst)
 {
+    if (!inst)
+        return false;
     return al_get_sample_instance_playing(inst);
 }
 
@@ -127,6 +138,8 @@ bool SoundCenter::is_playing(const ALLEGRO_SAMPLE_INSTANCE* const inst)
  */
 void SoundCenter::toggle_playing(ALLEGRO_SAMPLE_INSTANCE* inst)
 {
+    if (!inst)
+        return;
     bool is_playing = al_get_sample_instance_playing(inst);
     if (is_playing) {
         unsigned int pos = al_get_sample_instance_position(inst);

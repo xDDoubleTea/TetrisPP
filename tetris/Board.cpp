@@ -1,4 +1,5 @@
 #include "Board.h"
+#include "../data/ImageCenter.h"
 #include "../Utils.h"
 #include "../data/DataCenter.h"
 #include "../data/FontCenter.h"
@@ -36,7 +37,8 @@ void Board::init()
     debug_log("Trying to spawn initial piece...\n");
     spawnPiece();
     garbageQueue = 0;
-    background = al_load_bitmap("assets/background/pvz_playfield.png");
+    // Owned by ImageCenter, which substitutes a placeholder when absent.
+    background = ImageCenter::get_instance()->get("assets/background/pvz_playfield.png");
     // Test Garbage
     // garbageQueue = 5;
 }
@@ -289,28 +291,28 @@ void Board::drawLineClearTypes()
     DataCenter* DC = DataCenter::get_instance();
     switch (lastClearedLines) {
     case 1:
-        al_draw_textf(FC->courier_new[FontSize::LARGE], al_map_rgb(font_color.r, font_color.g, font_color.b),
+        al_draw_textf(FC->mono[FontSize::LARGE], al_map_rgb(font_color.r, font_color.g, font_color.b),
             BOARD_OFFSET_X - 30,
             BOARD_OFFSET_Y + HOLD_PIECE_OFFSET_Y + BLOCK_SIZE * 4,
             ALLEGRO_ALIGN_RIGHT,
             "SINGLE");
         break;
     case 2:
-        al_draw_textf(FC->courier_new[FontSize::LARGE], al_map_rgb(font_color.r, font_color.g, font_color.b),
+        al_draw_textf(FC->mono[FontSize::LARGE], al_map_rgb(font_color.r, font_color.g, font_color.b),
             BOARD_OFFSET_X - 30,
             BOARD_OFFSET_Y + HOLD_PIECE_OFFSET_Y + BLOCK_SIZE * 4,
             ALLEGRO_ALIGN_RIGHT,
             "DOUBLE");
         break;
     case 3:
-        al_draw_textf(FC->courier_new[FontSize::LARGE], al_map_rgb(font_color.r, font_color.g, font_color.b),
+        al_draw_textf(FC->mono[FontSize::LARGE], al_map_rgb(font_color.r, font_color.g, font_color.b),
             BOARD_OFFSET_X - 30,
             BOARD_OFFSET_Y + HOLD_PIECE_OFFSET_Y + BLOCK_SIZE * 4,
             ALLEGRO_ALIGN_RIGHT,
             "TRIPLE");
         break;
     case 4:
-        al_draw_textf(FC->courier_new[FontSize::LARGE], al_map_rgb(font_color.r, font_color.g, font_color.b),
+        al_draw_textf(FC->mono[FontSize::LARGE], al_map_rgb(font_color.r, font_color.g, font_color.b),
             BOARD_OFFSET_X - 30,
             BOARD_OFFSET_Y + HOLD_PIECE_OFFSET_Y + BLOCK_SIZE * 4,
             ALLEGRO_ALIGN_RIGHT,
@@ -343,14 +345,14 @@ void Board::drawLineClearTypes()
     }
     ColorRGB lastclearedColor = tetrimino_colors[static_cast<int>(lastClearedType)];
     if (lastClearWasSpin) {
-        al_draw_textf(FC->courier_new[FontSize::LARGE], al_map_rgb(lastclearedColor.r, lastclearedColor.g, lastclearedColor.b),
+        al_draw_textf(FC->mono[FontSize::LARGE], al_map_rgb(lastclearedColor.r, lastclearedColor.g, lastclearedColor.b),
             BOARD_OFFSET_X - 30,
             BOARD_OFFSET_Y + HOLD_PIECE_OFFSET_Y + BLOCK_SIZE * 3,
             ALLEGRO_ALIGN_RIGHT,
             "%s-SPIN", lastClearedTypeToString.c_str());
     }
     if (lastClearWasB2B) {
-        al_draw_textf(FC->courier_new[FontSize::LARGE], al_map_rgb(255, 215, 0),
+        al_draw_textf(FC->mono[FontSize::LARGE], al_map_rgb(255, 215, 0),
             BOARD_OFFSET_X - 30,
             BOARD_OFFSET_Y + HOLD_PIECE_OFFSET_Y + BLOCK_SIZE * 5,
             ALLEGRO_ALIGN_RIGHT,
@@ -427,15 +429,17 @@ void Board::drawDecorations()
 {
     DataCenter* DC = DataCenter::get_instance();
     FontCenter* FC = FontCenter::get_instance();
-    al_draw_tinted_scaled_bitmap(background, al_map_rgb(100, 100, 100), 0, 0, al_get_bitmap_width(background), al_get_bitmap_height(background),
-        0, 0,
-        DC->window_width, DC->window_height, 0);
-    al_draw_text(FC->courier_new[FontSize::LARGE], al_map_rgb(font_color.r, font_color.g, font_color.b),
+    // Skip only the artwork when it is missing; the labels below still draw.
+    if (background && !ImageCenter::get_instance()->is_placeholder(background))
+        al_draw_tinted_scaled_bitmap(background, al_map_rgb(100, 100, 100), 0, 0,
+            al_get_bitmap_width(background), al_get_bitmap_height(background), 0, 0,
+            DC->window_width, DC->window_height, 0);
+    al_draw_text(FC->mono[FontSize::LARGE], al_map_rgb(font_color.r, font_color.g, font_color.b),
         BOARD_OFFSET_X - 100,
         BOARD_OFFSET_Y,
         ALLEGRO_ALIGN_CENTRE,
         "HOLD");
-    al_draw_text(FC->courier_new[FontSize::LARGE], al_map_rgb(font_color.r, font_color.g, font_color.b),
+    al_draw_text(FC->mono[FontSize::LARGE], al_map_rgb(font_color.r, font_color.g, font_color.b),
         NEXT_QUEUE_OFFSET_X + BLOCK_SIZE * 2,
         NEXT_QUEUE_OFFSET_Y - 40,
         ALLEGRO_ALIGN_CENTRE,
@@ -470,6 +474,5 @@ Board::~Board()
         delete nextQueue.front();
         nextQueue.pop();
     }
-    if (background)
-        al_destroy_bitmap(background);
+    // background is owned by ImageCenter.
 }

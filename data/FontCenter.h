@@ -26,9 +26,14 @@ public:
     void init();
 
 public:
-    std::map<int, ALLEGRO_FONT*> caviar_dreams;
-    std::map<int, ALLEGRO_FONT*> courier_new;
-    std::map<int, ALLEGRO_FONT*> hun2;
+    /**
+     * @brief Proportional face, used for headings and menu text.
+     */
+    std::map<int, ALLEGRO_FONT*> ui;
+    /**
+     * @brief Monospaced face, used for the board overlay and statistics.
+     */
+    std::map<int, ALLEGRO_FONT*> mono;
 
 private:
     FontCenter() { }

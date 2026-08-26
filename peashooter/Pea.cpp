@@ -1,4 +1,5 @@
 #include "Pea.h"
+#include "../data/ImageCenter.h"
 #include "../Utils.h"
 #include "../data/DataCenter.h"
 #include <allegro5/allegro_primitives.h>
@@ -23,8 +24,9 @@ void Pea::init()
     flyspeed = 5;
     flytimer = 0;
     // debug_log("Loading pea bitmap...\n");
-    pea_bitmap = al_load_bitmap("assets/gifs/ProjectilePea.png");
-    GAME_ASSERT(pea_bitmap != nullptr, "Failed to load pea bitmap.");
+    // ImageCenter caches the bitmap and substitutes a placeholder when the file
+    // is absent, so it owns the memory and Pea must not destroy it.
+    pea_bitmap = ImageCenter::get_instance()->get("assets/gifs/ProjectilePea.png");
     hitbox = new Rectangle(x1, y1, x2, y2);
     GAME_ASSERT(hitbox != nullptr, "Failed to create pea hitbox.");
 }
@@ -63,6 +65,8 @@ bool Pea::collide_with_zombie()
 void Pea::draw()
 {
     // Draw pea
+    if (!pea_bitmap)
+        return;
     al_draw_scaled_bitmap(pea_bitmap, 0, 0, al_get_bitmap_width(pea_bitmap),
         al_get_bitmap_height(pea_bitmap), x1, y1, w, h, 0);
     // al_draw_rectangle(x1, y1, x2, y2, al_map_rgb(0, 255, 0), 2);
@@ -71,8 +75,7 @@ void Pea::draw()
 
 Pea::~Pea()
 {
-    if (pea_bitmap)
-        al_destroy_bitmap(pea_bitmap);
+    // pea_bitmap is owned by ImageCenter.
     if (hitbox)
         delete hitbox;
 }

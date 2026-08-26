@@ -153,7 +153,7 @@ void Game::game_init()
     DC->stat = stat;
 
     startButton = new Button(DC->window_width / 2.0 - 250, DC->window_height / 2.0, 500, 100, "Start Game");
-    startButton->setFont(FC->courier_new[FontSize::MEDIUM]);
+    startButton->setFont(FC->mono[FontSize::MEDIUM]);
     startButton->setOnClickCallback(
         [this]() {
             debug_log("<Game> state: change to LEVEL\n");
@@ -329,7 +329,10 @@ void Game::game_draw()
     }
     switch (state) {
     case STATE::START: {
-        al_draw_bitmap(background, 0, 0, 0);
+        if (IC->is_placeholder(background))
+            al_clear_to_color(al_map_rgb(18, 22, 30));
+        else
+            al_draw_bitmap(background, 0, 0, 0);
         ui->drawStartScreen();
         startButton->draw();
     }
@@ -340,15 +343,18 @@ void Game::game_draw()
         // game layout cover
         al_draw_filled_rectangle(0, 0, DC->window_width, DC->window_height,
             al_map_rgba(50, 50, 50, 64));
-        al_draw_text(FC->caviar_dreams[FontSize::LARGE], al_map_rgb(255, 255, 255),
+        al_draw_text(FC->ui[FontSize::LARGE], al_map_rgb(255, 255, 255),
             DC->window_width / 2., DC->window_height / 2.,
             ALLEGRO_ALIGN_CENTRE, "GAME PAUSED");
         break;
     }
     case STATE::END: {
         ALLEGRO_BITMAP* gameover = IC->get(game_over_img_path);
-        al_draw_scaled_bitmap(gameover, 0, 0, al_get_bitmap_width(gameover), al_get_bitmap_height(gameover),
-            0, 0, DC->window_width, DC->window_height, 0);
+        if (IC->is_placeholder(gameover))
+            al_clear_to_color(al_map_rgb(20, 10, 10));
+        else
+            al_draw_scaled_bitmap(gameover, 0, 0, al_get_bitmap_width(gameover), al_get_bitmap_height(gameover),
+                0, 0, DC->window_width, DC->window_height, 0);
         break;
     }
     }

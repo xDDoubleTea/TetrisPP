@@ -22,9 +22,10 @@ void PeaShooter::init()
     idle_animation = algif_load_animation("assets/gifs/PeaShooter_Idle1.gif");
     // debug_log("PeaShooter idle animation loaded.\n");
     shoot_animation = algif_load_animation("assets/gifs/PeaShooter_Spitnew.gif");
-    GAME_ASSERT(shoot_animation != nullptr, "Failed to load PeaShooter shooting animation.");
-    // debug_log("PeaShooter animations loaded.\n");
-    shoot_animation->loop = 1;
+    // Artwork is optional: without it the peashooter still updates and shoots,
+    // it just is not drawn.
+    if (shoot_animation)
+        shoot_animation->loop = 1;
     state = STATE::IDLE;
     hitbox = new Rectangle(x1, y1, x2, y2);
 }
@@ -38,8 +39,9 @@ void PeaShooter::recieve_attack(int damage)
 bool PeaShooter::update()
 {
     if (state == STATE::SHOOTING) {
-        ALLEGRO_BITMAP* frame = algif_get_bitmap(shoot_animation, al_get_time());
-        if (frame == NULL) {
+        if (!shoot_animation) {
+            state = STATE::IDLE;
+        } else if (algif_get_bitmap(shoot_animation, al_get_time()) == NULL) {
             // Shooting animation ended
             state = STATE::IDLE;
             shoot_animation->start_time = 0;
@@ -60,12 +62,16 @@ bool PeaShooter::update()
 void PeaShooter::draw()
 {
     if (state == STATE::IDLE) {
+        if (!idle_animation)
+            return;
         ALLEGRO_BITMAP* frame = algif_get_bitmap(idle_animation, al_get_time());
         if (frame == NULL)
             return;
         al_draw_scaled_bitmap(frame, 0, 0, al_get_bitmap_width(frame), al_get_bitmap_height(frame), x1,
             y1, x2 - x1, y2 - y1, 0);
     } else if (state == STATE::SHOOTING) {
+        if (!shoot_animation)
+            return;
         ALLEGRO_BITMAP* frame = algif_get_bitmap(shoot_animation, al_get_time());
         if (frame == NULL) {
             state = STATE::IDLE;

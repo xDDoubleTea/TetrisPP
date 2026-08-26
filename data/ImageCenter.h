@@ -21,9 +21,16 @@ public:
     ALLEGRO_BITMAP* get(const std::string& path);
     ALLEGRO_BITMAP* get(const char* path) { return get(std::string { path }); }
     bool erase(const std::string& path);
+    bool is_placeholder(const ALLEGRO_BITMAP* bitmap) const;
 
 private:
     ImageCenter() { }
+    /**
+     * @brief The checkerboard returned when an image cannot be loaded, created on
+     * first use and shared by every missing path.
+     */
+    ALLEGRO_BITMAP* placeholder();
+    ALLEGRO_BITMAP* placeholder_bitmap = nullptr;
     /**
      * @brief All loaded bitmaps are stored in this map container.
      * @details The key object of this map is the image path. Make sure the path must be the same if the same image will be queried multiple times, otherwise the image will be duplicately loaded.
