@@ -41,6 +41,12 @@ received, and APM / PPS / APP.
 | <kbd>Enter</kbd>          | Start                    |
 | <kbd>P</kbd>              | Pause                    |
 
+### Handling
+
+DAS (delayed auto shift) and ARR (auto repeat rate) are set from the start
+menu, cycling through 0, 5, 10 and 15 frames. The choice persists across runs
+for the session.
+
 ## Build
 
 Install the dependencies, then build:

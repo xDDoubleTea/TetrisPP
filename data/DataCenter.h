@@ -140,6 +140,12 @@ public:
      */
     bool prev_mouse_state[ALLEGRO_MOUSE_MAX_EXTRA_AXES];
 
+    /**
+     * @brief Selectable delayed-auto-shift and auto-repeat-rate values, in frames.
+     */
+    int arrlist[4] = { 0, 5, 10, 15 };
+    int daslist[4] = { 0, 5, 10, 15 };
+
 public:
     /**
      * @brief Stores the basic information that a player should have.
@@ -158,7 +164,32 @@ public:
     std::vector<Zombie*> zombies;
     std::vector<Pea*> peas;
 
+    void setDASDelay(int delay) { DAS = delay; }
+    void setARRDelay(int delay) { ARR = delay; }
+
+    int getDASDelayIndex() const
+    {
+        for (int i = 0; i < 4; ++i) {
+            if (daslist[i] == DAS)
+                return i;
+        }
+        return 0; // Default to index 0 if not found
+    }
+    int getARRDelayIndex() const
+    {
+        for (int i = 0; i < 4; ++i) {
+            if (arrlist[i] == ARR)
+                return i;
+        }
+        return 0; // Default to index 0 if not found
+    }
+
+    int getDASDelay() const { return DAS; }
+    int getARRDelay() const { return ARR; }
+
 private:
+    int DAS = 10;
+    int ARR = 0;
     DataCenter();
 };
 

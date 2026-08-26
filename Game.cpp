@@ -11,6 +11,7 @@
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_ttf.h>
 #include <cstring>
+#include <string>
 // #include <vector>
 
 // fixed settings
@@ -171,6 +172,23 @@ void Game::game_init()
     DC->add_zombie(new Zombie());
     DC->peaShooter = new PeaShooter();
 
+    ARRButton = new Button(DC->window_width / 2.0 - 125, DC->window_height / 2.0 + 150, 250, 50,
+                           "ARR : " + std::to_string(DC->getARRDelay()));
+    DASButton = new Button(DC->window_width / 2.0 - 125, DC->window_height / 2.0 + 250, 250, 50,
+                           "DAS : " + std::to_string(DC->getDASDelay()));
+    ARRButton->setFont(FC->mono[FontSize::MEDIUM]);
+    DASButton->setFont(FC->mono[FontSize::MEDIUM]);
+    ARRButton->setOnClickCallback(
+        [this, DC]() {
+            DC->setARRDelay(DC->arrlist[(DC->getARRDelayIndex() + 1) % 4]);
+            ARRButton->setText("ARR : " + std::to_string(DC->getARRDelay()));
+        });
+    DASButton->setOnClickCallback(
+        [this, DC]() {
+            DC->setDASDelay(DC->daslist[(DC->getDASDelayIndex() + 1) % 4]);
+            DASButton->setText("DAS : " + std::to_string(DC->getDASDelay()));
+        });
+
     // game start
     background = IC->get(background_img_path);
     debug_log("Game state: change to START\n");
@@ -257,6 +275,14 @@ bool Game::game_update()
             startButton->update();
         else
             GAME_ASSERT(false, "Start Button is not initialized.");
+        if (DASButton)
+            DASButton->update();
+        else
+            GAME_ASSERT(false, "DAS Button is not initialized.");
+        if (ARRButton)
+            ARRButton->update();
+        else
+            GAME_ASSERT(false, "ARR Button is not initialized.");
 
         break;
     }
@@ -385,6 +411,9 @@ void Game::game_draw()
             al_draw_bitmap(background, 0, 0, 0);
         ui->drawStartScreen();
         startButton->draw();
+        ARRButton->draw();
+        DASButton->draw();
+        break;
     }
     case STATE::LEVEL: {
         break;

@@ -66,6 +66,8 @@ private:
     Tetris::Board* board = nullptr;
     Tetris::Stat* stat = nullptr;
     Button* startButton = nullptr;
+    Button* DASButton = nullptr;
+    Button* ARRButton = nullptr;
 };
 
 #endif

@@ -25,6 +25,8 @@ Tetrimino::Tetrimino(TetriminoType t)
 bool Tetrimino::update(Board& board)
 {
     DataCenter* DC = DataCenter::get_instance();
+    const int DAS_DELAY = DC->getDASDelay();
+    const int ARR_DELAY = DC->getARRDelay();
 
     // --- Horizontal Movement (DAS/ARR) ---
     int dx = 0;
