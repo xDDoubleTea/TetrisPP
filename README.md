@@ -1,6 +1,6 @@
 # TetrisPP
 
-A guideline-style Tetris game with a Plants-vs-Zombies theme, written in C++17 on
+A guideline-style Tetris game with a tower-defense layer, written in C++17 on
 top of [Allegro 5](https://liballeg.org/).
 
 [![build-linux](https://github.com/xDDoubleTea/TetrisPP/actions/workflows/build-linux.yml/badge.svg)](https://github.com/xDDoubleTea/TetrisPP/actions/workflows/build-linux.yml)
@@ -16,6 +16,8 @@ A 10×20 board with the standard guideline mechanics:
 - **Spin detection** — T-spins and all-spins, both scored.
 - **Garbage** — incoming attacks queue up, rise from the bottom with a single
   hole per line, and are cancelled by clearing lines.
+- **Tower-defense layer** — a shooter and advancing enemies share the field;
+  line clears deal damage and enemies send garbage back.
 - **Damage** from line clears, scaled by combo, back-to-back, spins and perfect
   clears.
 - **DAS/ARR** horizontal movement and a lock timer that resets on rotation or
@@ -70,6 +72,15 @@ make PKG_CONFIG_PATH=/your/prefix/lib/pkgconfig
 **Run the game from the repository root** — assets are resolved relative to the
 working directory (`./assets/...`).
 
+### Assets
+
+The repository ships only fonts (Inter and JetBrains Mono, both SIL OFL 1.1).
+Backgrounds, sprites, music and sound effects are not included, and the game
+runs without them: missing images become a checkerboard placeholder, missing
+animations are skipped, and missing audio plays silently. See
+[`assets/README.md`](assets/README.md) for the paths to drop your own files
+into.
+
 ### Make targets
 
 | Target                  | Effect                                                       |
@@ -112,3 +123,8 @@ is what CI uses as a smoke test.
 - [ ] Boss fights
 - [x] More music
 - [x] Load assets at the start of the game instead of after starting the game
+
+## Licence
+
+MIT, see [LICENSE](LICENSE). The bundled fonts are under the SIL Open Font
+License 1.1.
