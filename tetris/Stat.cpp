@@ -19,6 +19,7 @@ Stat::Stat()
     , PPS(0.0)
     , combo_count(0.0)
     , attacks_sent(0)
+    , attacks_received(0)
 {
 }
 
@@ -36,6 +37,7 @@ void Stat::init()
     APM = 0.0;
     PPS = 0.0;
     combo_count = 0.0;
+    attacks_received = 0;
 }
 
 void Stat::update()
@@ -44,7 +46,8 @@ void Stat::update()
     time_played_seconds = frames_played / DataCenter::get_instance()->FPS;
     APM = (attacks_sent / static_cast<double>(frames_played)) * DataCenter::get_instance()->FPS * 60.0;
     PPS = (pieces_placed / static_cast<double>(frames_played)) * DataCenter::get_instance()->FPS;
-    APP = (attacks_sent / static_cast<double>(pieces_placed));
+    // Guard the first frames of a run, where no piece has been placed yet.
+    APP = pieces_placed ? (attacks_sent / static_cast<double>(pieces_placed)) : 0.0;
 }
 
 void Stat::updatePieceStat(size_t lines_cleared, bool is_t_spin, bool is_pc, bool is_b2b, bool is_all_spin)

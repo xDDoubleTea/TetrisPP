@@ -75,6 +75,21 @@ public:
         peas.push_back(pea);
     }
 
+    /**
+     * @brief Destroy every spawned entity and empty the containers.
+     * @details Used when a run ends so the next one starts from a clean field.
+     */
+    void clear_entities()
+    {
+        for (Zombie* zombie : zombies)
+            delete zombie;
+        zombies.clear();
+        for (Pea* pea : peas)
+            delete pea;
+        peas.clear();
+        delete peaShooter;
+        peaShooter = nullptr;
+    }
     void get_zombies(std::vector<Zombie*>& out_zombies) const
     {
         out_zombies = zombies;
@@ -137,9 +152,9 @@ public:
      * @see Level
      */
     Level* level;
-    Tetris::Board* board;
-    Tetris::Stat* stat;
-    PeaShooter* peaShooter;
+    Tetris::Board* board = nullptr;
+    Tetris::Stat* stat = nullptr;
+    PeaShooter* peaShooter = nullptr;
     std::vector<Zombie*> zombies;
     std::vector<Pea*> peas;
 

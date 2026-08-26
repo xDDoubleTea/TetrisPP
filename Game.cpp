@@ -178,6 +178,50 @@ void Game::game_init()
     al_start_timer(timer);
 }
 
+
+/**
+ * @brief Stop a looping sample instance and hand it back to SoundCenter.
+ * @details SoundCenter::update only reaps instances that are stopped, rewound
+ * and not looping, so a looping instance must have its playmode cleared first
+ * or it lives until the process exits. The caller's pointer is nulled because
+ * the instance is destroyed on the next SoundCenter::update.
+ */
+static void stop_and_release(ALLEGRO_SAMPLE_INSTANCE*& instance)
+{
+    if (!instance)
+        return;
+    al_set_sample_instance_playmode(instance, ALLEGRO_PLAYMODE_ONCE);
+    al_stop_sample_instance(instance);
+    instance = nullptr;
+}
+
+
+/**
+ * @brief Tear down a finished run and build a fresh one.
+ */
+void Game::reset_level()
+{
+    DataCenter* DC = DataCenter::get_instance();
+    OperationCenter* OC = OperationCenter::get_instance();
+
+    stop_and_release(level_bgm);
+    level_bgm_playing = false;
+
+    DC->clear_entities();
+    OC->reset();
+
+    delete board;
+    board = new Tetris::Board();
+    DC->board = board;
+
+    delete stat;
+    stat = new Tetris::Stat();
+    DC->stat = stat;
+
+    DC->peaShooter = new PeaShooter();
+    DC->add_zombie(new Zombie());
+}
+
 /**
  * @brief The function processes all data update.
  * @details The behavior of the whole game body is determined by its state.
@@ -190,12 +234,6 @@ bool Game::game_update()
     DataCenter* DC = DataCenter::get_instance();
     OperationCenter* OC = OperationCenter::get_instance();
     SoundCenter* SC = SoundCenter::get_instance();
-    static ALLEGRO_SAMPLE_INSTANCE* game_start_sound = nullptr;
-    static ALLEGRO_SAMPLE_INSTANCE* background = nullptr;
-    static ALLEGRO_SAMPLE_INSTANCE* game_over_sound = nullptr;
-    // ImageCenter* IC = ImageCenter::get_instance();
-    static bool game_menu_BGM_played = false;
-    static bool main_BGM_played = false;
 
     switch (state) {
     case STATE::START: {
@@ -210,9 +248,9 @@ bool Game::game_update()
         //     debug_log("<Game> state: change to LEVEL\n");
         //     state = STATE::LEVEL;
         // }
-        if (!game_menu_BGM_played) {
-            game_start_sound = SC->play(game_menu_sound_path, ALLEGRO_PLAYMODE_LOOP);
-            game_menu_BGM_played = true;
+        if (!menu_bgm_playing) {
+            menu_bgm = SC->play(game_menu_sound_path, ALLEGRO_PLAYMODE_LOOP);
+            menu_bgm_playing = true;
         }
 
         if (startButton)
@@ -223,17 +261,17 @@ bool Game::game_update()
         break;
     }
     case STATE::LEVEL: {
-        if (game_menu_BGM_played) {
-            SC->toggle_playing(game_start_sound);
-            game_menu_BGM_played = false;
+        if (menu_bgm_playing) {
+            stop_and_release(menu_bgm);
+            menu_bgm_playing = false;
         }
 
-        if (!main_BGM_played) {
-            background = SC->play(background_sound_path, ALLEGRO_PLAYMODE_LOOP);
-            main_BGM_played = true;
+        if (!level_bgm_playing) {
+            level_bgm = SC->play(background_sound_path, ALLEGRO_PLAYMODE_LOOP);
+            level_bgm_playing = true;
         }
         if (DC->key_state[ALLEGRO_KEY_P] && !DC->prev_key_state[ALLEGRO_KEY_P]) {
-            SC->toggle_playing(background);
+            SC->toggle_playing(level_bgm);
             debug_log("<Game> state: change to PAUSE\n");
             state = STATE::PAUSE;
         }
@@ -257,24 +295,36 @@ bool Game::game_update()
         break;
     }
     case STATE::PAUSE: {
-        // if (DC->key_state[ALLEGRO_KEY_P] && !DC->prev_key_state[ALLEGRO_KEY_P]) {
-        //     SC->toggle_playing(background);
-        //     debug_log("<Game> state: change to LEVEL\n");
-        //     state = STATE::LEVEL;
-        // }
+        if (DC->key_state[ALLEGRO_KEY_P] && !DC->prev_key_state[ALLEGRO_KEY_P]) {
+            SC->toggle_playing(level_bgm);
+            debug_log("<Game> state: change to LEVEL\n");
+            state = STATE::LEVEL;
+        }
+        if (DC->key_state[ALLEGRO_KEY_ESCAPE] && !DC->prev_key_state[ALLEGRO_KEY_ESCAPE]) {
+            debug_log("<Game> abandoning run, state: change to START\n");
+            reset_level();
+            state = STATE::START;
+        }
         break;
     }
     case STATE::END: {
-        if (SC->is_playing(background))
-            SC->toggle_playing(background);
-        if (!game_over_sound) {
-            game_over_sound = SC->play(game_over_sound_path, ALLEGRO_PLAYMODE_ONCE);
+        if (level_bgm_playing) {
+            stop_and_release(level_bgm);
+            level_bgm_playing = false;
+            SC->play(game_over_sound_path, ALLEGRO_PLAYMODE_ONCE);
         }
 
         if (DC->key_state[ALLEGRO_KEY_ENTER] && !DC->prev_key_state[ALLEGRO_KEY_ENTER]) {
+            debug_log("<Game> state: change to START\n");
+            reset_level();
+            state = STATE::START;
+            break;
+        }
+        if (DC->key_state[ALLEGRO_KEY_ESCAPE] && !DC->prev_key_state[ALLEGRO_KEY_ESCAPE]) {
             debug_log("<Game> Exiting game from END state.\n");
             return false;
         }
+        break;
     }
     }
     // If the game is not paused, we should progress update.
@@ -346,6 +396,9 @@ void Game::game_draw()
         al_draw_text(FC->ui[FontSize::LARGE], al_map_rgb(255, 255, 255),
             DC->window_width / 2., DC->window_height / 2.,
             ALLEGRO_ALIGN_CENTRE, "GAME PAUSED");
+        al_draw_text(FC->mono[FontSize::MEDIUM], al_map_rgb(200, 200, 200),
+            DC->window_width / 2., DC->window_height / 2. + 60,
+            ALLEGRO_ALIGN_CENTRE, "P  resume          ESC  quit to menu");
         break;
     }
     case STATE::END: {
@@ -355,6 +408,12 @@ void Game::game_draw()
         else
             al_draw_scaled_bitmap(gameover, 0, 0, al_get_bitmap_width(gameover), al_get_bitmap_height(gameover),
                 0, 0, DC->window_width, DC->window_height, 0);
+        al_draw_text(FC->ui[FontSize::LARGE], al_map_rgb(255, 255, 255),
+            DC->window_width / 2., DC->window_height / 2. - 40,
+            ALLEGRO_ALIGN_CENTRE, "GAME OVER");
+        al_draw_text(FC->mono[FontSize::MEDIUM], al_map_rgb(200, 200, 200),
+            DC->window_width / 2., DC->window_height / 2. + 40,
+            ALLEGRO_ALIGN_CENTRE, "ENTER  back to menu          ESC  quit");
         break;
     }
     }

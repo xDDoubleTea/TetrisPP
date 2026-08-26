@@ -22,6 +22,10 @@ public:
      * @details Calls all other draw functions.
      */
     void draw();
+    /**
+     * @brief Reset per-run state so a new run does not inherit the old timer.
+     */
+    void reset() { zombie_spawn_timer = 0; }
 
 private:
     OperationCenter() { }
